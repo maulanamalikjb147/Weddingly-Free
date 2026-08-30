@@ -24,6 +24,7 @@ export const defaultConfig = {
     timeline_3_content: process.env.NEXT_PUBLIC_YEAR_3_CONTENT || "Default Timeline 3 Content",
     timeline_4: process.env.NEXT_PUBLIC_YEAR_4 || "Default Timeline 4",
     timeline_4_content: process.env.NEXT_PUBLIC_YEAR_4_CONTENT || "Default Timeline 4 Content",
+    backgroundMusicUrl: process.env.NEXT_PUBLIC_BACKGROUND_MUSIC_URL || "",
     holyMatrimony: {
         enabled: process.env.NEXT_PUBLIC_HOLY_MATRIMONY === 'true',
         time: process.env.NEXT_PUBLIC_HOLY_MATRIMONY_TIME || "00:00",

@@ -56,6 +56,7 @@ export default function ContentCms() {
   
   // Media State
   const [imageAssets, setImageAssets] = useState([])
+  const [musicAssets, setMusicAssets] = useState([])
   const [uploading, setUploading] = useState(false)
   const [mediaTarget, setMediaTarget] = useState('galeri') // 'galeri' or background keys
   const update = (key, value) => {
@@ -122,6 +123,27 @@ export default function ContentCms() {
       setImageAssets(assets)
     } catch (error) {
       console.error('Failed to load assets', error)
+    }
+  }
+
+  const loadMusicAssets = async () => {
+    try {
+      const { data, error } = await supabase.storage.from('wedding-assets').list('cms/imported/music', { limit: 50, sortBy: { column: 'created_at', order: 'desc' } })
+      if (error) throw error
+      
+      const files = data.filter((file) => file.name !== '.emptyFolderPlaceholder')
+      const assets = files.map((file) => {
+        const { data: { publicUrl } } = supabase.storage.from('wedding-assets').getPublicUrl(`cms/imported/music/${file.name}`)
+        return {
+          id: file.id,
+          file_name: file.name,
+          public_url: publicUrl,
+          created_at: file.created_at
+        }
+      })
+      setMusicAssets(assets)
+    } catch (error) {
+      console.error('Failed to load music assets', error)
     }
   }
 
@@ -210,6 +232,7 @@ export default function ContentCms() {
     { id: 'rekening', name: 'Rekening (Gift)' },
     { id: 'lainnya', name: 'Fitur Lainnya' },
     { id: 'latar-belakang', name: 'Latar Belakang' },
+    { id: 'musik', name: 'Musik Latar' },
   ]
 
   const renderTabContent = () => {
@@ -470,8 +493,8 @@ export default function ContentCms() {
         { key: 'slide_5', label: 'Slide 5 (Detail Acara)' },
         { key: 'slide_6', label: 'Slide 6 (Countdown)' },
         { key: 'slide_7', label: 'Slide 7 (Live Streaming)' },
-        { key: 'slide_8', label: 'Slide 8 (Prewedding)' },
-        { key: 'slide_9', label: 'Slide 9 (RSVP / Form)' },
+        { key: 'slide_8', label: 'Slide 8 (Galeri)' },
+        { key: 'slide_9', label: 'Slide 9 (RSVP)' },
         { key: 'slide_10', label: 'Slide 10 (Wishes)' },
         { key: 'bg_gifts', label: 'Halaman Wedding Gift' },
       ]
@@ -510,8 +533,66 @@ export default function ContentCms() {
       )
     }
 
+    if (activeTab === 'musik') {
+      return (
+        <div className="cms-repeat-list">
+          <article className="cms-repeat-item">
+            <div className="cms-repeat-head"><strong>Pilih Musik Latar</strong></div>
+            <p className="cms-helper-text">Pilih salah satu lagu untuk diputar secara otomatis di latar belakang. Anda dapat mengunggah file .mp3 ke folder `cms/imported/music` di Supabase untuk menambahkannya ke daftar ini.</p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
+              {musicAssets.length === 0 ? (
+                <p style={{ color: '#666', fontStyle: 'italic' }}>Belum ada musik yang diunggah.</p>
+              ) : (
+                musicAssets.map((music) => {
+                  const isSelected = content.backgroundMusicUrl === music.public_url;
+                  return (
+                    <div key={music.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: isSelected ? '#f0fdf4' : '#f9fafb', border: `1px solid ${isSelected ? '#22c55e' : '#e5e7eb'}`, borderRadius: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ color: '#fff', fontSize: '20px' }}>🎵</span>
+                        </div>
+                        <div>
+                          <strong style={{ display: 'block', color: '#111827' }}>{music.file_name}</strong>
+                          <audio src={music.public_url} controls style={{ height: '30px', marginTop: '8px' }} />
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => update('backgroundMusicUrl', music.public_url)}
+                        style={{ padding: '8px 16px', background: isSelected ? '#22c55e' : '#000', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, display: 'flex', gap: '8px', alignItems: 'center' }}
+                      >
+                        {isSelected ? <><Check size={16} /> Terpilih</> : 'Pilih Lagu ini'}
+                      </button>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+            {content.backgroundMusicUrl && (
+              <button 
+                onClick={() => update('backgroundMusicUrl', '')}
+                style={{ marginTop: '16px', padding: '8px 16px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, display: 'flex', gap: '8px', alignItems: 'center' }}
+              >
+                <Trash2 size={16} /> Hapus Musik Terpilih
+              </button>
+            )}
+          </article>
+        </div>
+      )
+    }
+
     return null
   }
+
+  useEffect(() => {
+    if (activeTab === 'galeri' || activeTab === 'latar-belakang') {
+      // Actually we just use `media` view for images now, but if we need, we can trigger it.
+      // We will trigger loadMusicAssets for 'musik' tab.
+    }
+    if (activeTab === 'musik') {
+      void loadMusicAssets()
+    }
+  }, [activeTab])
 
   return (
     <div className="admin-page cms-page">

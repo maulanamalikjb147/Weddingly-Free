@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { IoIosArrowUp } from "react-icons/io";
 import { FaInstagram } from "react-icons/fa";
 import Link from "next/link";
@@ -11,6 +11,7 @@ import WishesList from "./WishesList";
 import GallerySection from "./GallerySection";
 import GiftsSection from "./GiftsSection";
 import type { WeddingConfig } from "@/lib/config";
+import MusicPlayer from "./MusicPlayer";
 
 type WeddingScreenProps = {
   name?: string;
@@ -21,7 +22,6 @@ type WeddingScreenProps = {
 const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) => {
   const [fadeClass, setFadeClass] = useState("opacity-0");
   const [isOpen, setIsOpen] = useState(false);
-  const audioRef = useRef(null);
 
   // Untuk fade-in pertama kali
   useEffect(() => {
@@ -45,10 +45,6 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
 
   const handleOpen = () => {
     setIsOpen(!isOpen);
-    if (!isOpen && audioRef.current) {
-      // Play music when "Open" is clicked
-      (audioRef.current as HTMLAudioElement).play();
-    }
     if (!isOpen && onOpenInvitation) {
       onOpenInvitation();
     }
@@ -670,7 +666,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
         )}
       </div>
       {/* Audio Element */}
-      <audio ref={audioRef} src="/music/wedding_song.mp3" preload="auto" />
+      <MusicPlayer src={config.backgroundMusicUrl} isInvitationOpen={isOpen} />
     </div>
   );
 };

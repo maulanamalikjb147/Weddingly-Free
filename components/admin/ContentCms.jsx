@@ -257,21 +257,21 @@ export default function ContentCms() {
           </div>
         </article>
         <article className="cms-repeat-item mt-4">
-          <div className="cms-repeat-head"><strong>Mempelai Pria</strong></div>
-          <div className="cms-fields-grid">
-            <Field label="Nama Lengkap" value={content.groom} onChange={(v) => update('groom', v)} />
-            <Field label="Nama Panggilan" value={content.groomNickName} onChange={(v) => update('groomNickName', v)} />
-            <Field label="Instagram" value={content.groomInstagram} onChange={(v) => update('groomInstagram', v)} />
-            <TextArea label="Bio / Detail Orang Tua" value={content.groomBio} onChange={(v) => update('groomBio', v)} />
-          </div>
-        </article>
-        <article className="cms-repeat-item mt-4">
           <div className="cms-repeat-head"><strong>Mempelai Wanita</strong></div>
           <div className="cms-fields-grid">
             <Field label="Nama Lengkap" value={content.bride} onChange={(v) => update('bride', v)} />
             <Field label="Nama Panggilan" value={content.brideNickName} onChange={(v) => update('brideNickName', v)} />
             <Field label="Instagram" value={content.brideInstagram} onChange={(v) => update('brideInstagram', v)} />
             <TextArea label="Bio / Detail Orang Tua" value={content.brideBio} onChange={(v) => update('brideBio', v)} />
+          </div>
+        </article>
+        <article className="cms-repeat-item mt-4">
+          <div className="cms-repeat-head"><strong>Mempelai Pria</strong></div>
+          <div className="cms-fields-grid">
+            <Field label="Nama Lengkap" value={content.groom} onChange={(v) => update('groom', v)} />
+            <Field label="Nama Panggilan" value={content.groomNickName} onChange={(v) => update('groomNickName', v)} />
+            <Field label="Instagram" value={content.groomInstagram} onChange={(v) => update('groomInstagram', v)} />
+            <TextArea label="Bio / Detail Orang Tua" value={content.groomBio} onChange={(v) => update('groomBio', v)} />
           </div>
         </article>
       </div>
@@ -487,8 +487,8 @@ export default function ContentCms() {
         { key: 'bg_welcome', label: 'Halaman Welcome (Utama)' },
         { key: 'bg_bride_groom', label: 'Slide Pengantar Mempelai' },
         { key: 'slide_1', label: 'Slide 1 (Ayat Alkitab)' },
-        { key: 'slide_2', label: 'Slide 2 (Mempelai Pria)' },
-        { key: 'slide_3', label: 'Slide 3 (Mempelai Wanita)' },
+        { key: 'slide_2', label: 'Slide 2 (Mempelai Wanita)' },
+        { key: 'slide_3', label: 'Slide 3 (Mempelai Pria)' },
         { key: 'slide_4', label: 'Slide 4 (Timeline)' },
         { key: 'slide_5', label: 'Slide 5 (Detail Acara)' },
         { key: 'slide_6', label: 'Slide 6 (Countdown)' },

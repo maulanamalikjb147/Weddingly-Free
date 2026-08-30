@@ -12,9 +12,10 @@ import { config } from "@/lib/config";
 
 type WeddingScreenProps = {
   name?: string;
+  onOpenInvitation?: () => void;
 };
 
-const WeddingScreen = ({ name }: WeddingScreenProps) => {
+const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
   const [fadeClass, setFadeClass] = useState("opacity-0");
   const [isOpen, setIsOpen] = useState(false);
   const audioRef = useRef(null);
@@ -33,6 +34,9 @@ const WeddingScreen = ({ name }: WeddingScreenProps) => {
     if (!isOpen && audioRef.current) {
       // Play music when "Open" is clicked
       (audioRef.current as HTMLAudioElement).play();
+    }
+    if (!isOpen && onOpenInvitation) {
+      onOpenInvitation();
     }
   };
 

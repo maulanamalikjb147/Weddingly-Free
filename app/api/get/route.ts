@@ -1,26 +1,39 @@
-import { NextResponse } from "next/server"; // For new Next.js API route handling
-import connectToDatabase from "@/lib/db";
-import Wish from "@/lib/models/Wish";
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const page = parseInt(searchParams.get("page") || "1", 10); // Get page number from query, default to 1
-  const limit = parseInt(searchParams.get("limit") || "5", 10); // Get limit from query, default to 5
+  const page = parseInt(searchParams.get("page") || "1", 10);
+  const limit = parseInt(searchParams.get("limit") || "5", 10);
 
   try {
-    await connectToDatabase();
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
 
     // Fetch paginated wishes
-    const wishes = await Wish.find()
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+    const { data: wishes, error, count } = await supabase
+      .from("rsvps")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
 
-    const totalWishes = await Wish.countDocuments();
+    if (error) {
+      throw error;
+    }
+    
+    // Map data to match what the frontend expects
+    const formattedWishes = wishes.map((wish) => ({
+      _id: wish.id,
+      name: wish.name,
+      attendance: wish.attendance,
+      guests: wish.guests,
+      message: wish.message,
+      createdAt: wish.created_at,
+    }));
 
     return NextResponse.json({
-      wishes,
-      totalPages: Math.ceil(totalWishes / limit),
+      wishes: formattedWishes,
+      totalPages: Math.ceil((count || 0) / limit),
       currentPage: page,
     });
   } catch (error) {

@@ -1,12 +1,20 @@
 import { NextResponse } from "next/server";
-import connectToDatabase from "@/lib/db";
-import Wish from "@/lib/models/Wish";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(req: Request) {
   try {
     const { name, attendance, guests, message } = await req.json();
-    await connectToDatabase();
-    await Wish.create({ name, attendance, guests, message });
+    
+    const { error } = await supabase.from("rsvps").insert({
+      name,
+      attendance: attendance === "Hadir" ? "hadir" : "tidak",
+      guests: Number(guests) || 1,
+      message,
+    });
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json(
       {
@@ -20,7 +28,6 @@ export async function POST(req: Request) {
   }
 }
 
-// Optional: Handler untuk method yang tidak diizinkan
 export async function GET() {
   return new NextResponse("Method Not Allowed", { status: 405 });
 }

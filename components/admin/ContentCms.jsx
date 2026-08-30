@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Check, RefreshCw, Save, X, ImagePlus, Trash2, Upload } from 'lucide-react'
+import { ArrowLeft, Check, RefreshCw, Save, X, ImagePlus, Trash2, Upload, GripVertical } from 'lucide-react'
 import { supabase } from './supabaseClient'
 import { defaultConfig } from '@/lib/config'
 
@@ -210,6 +210,42 @@ export default function ContentCms() {
     }
   }
 
+  const uploadMusicFiles = async (event) => {
+    try {
+      setUploading(true)
+      const files = Array.from(event.target.files)
+      if (!files.length) return
+
+      for (const file of files) {
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`
+        
+        const { error: uploadError } = await supabase.storage.from('wedding-assets').upload(`cms/imported/music/${fileName}`, file, { upsert: false })
+        if (uploadError) throw uploadError
+      }
+      await loadMusicAssets()
+    } catch (error) {
+      alert(`Gagal mengupload musik: ${error.message}`)
+    } finally {
+      setUploading(false)
+      event.target.value = ''
+    }
+  }
+
+  const deleteMusicAsset = async (asset) => {
+    if (!confirm('Yakin ingin menghapus musik ini?')) return
+    try {
+      const { error } = await supabase.storage.from('wedding-assets').remove([`cms/imported/music/${asset.file_name}`])
+      if (error) throw error
+      if (content.backgroundMusicUrl === asset.public_url) {
+        update('backgroundMusicUrl', '')
+      }
+      await loadMusicAssets()
+    } catch (error) {
+      alert(`Gagal menghapus musik: ${error.message}`)
+    }
+  }
+
   const handleSelectMedia = (asset) => {
     if (mediaTarget === 'galeri') {
       if (!content.gallery.photos.some((photo) => photo.src === asset.public_url)) {
@@ -223,17 +259,44 @@ export default function ContentCms() {
     setView('form')
   }
 
-  const tabs = [
+  const SECTION_NAMES = {
+    'cerita': 'Ayat & Timeline',
+    'mempelai': 'Data Mempelai',
+    'acara': 'Detail Acara',
+    'galeri': 'Galeri Foto',
+    'rekening': 'Rekening (Gift)'
+  };
+  
+  const SETTING_TABS = [
     { id: 'general', name: 'Umum & Tanggal' },
-    { id: 'mempelai', name: 'Data Mempelai' },
-    { id: 'cerita', name: 'Ayat & Timeline' },
-    { id: 'acara', name: 'Detail Acara' },
-    { id: 'galeri', name: 'Galeri Foto' },
-    { id: 'rekening', name: 'Rekening (Gift)' },
     { id: 'lainnya', name: 'Fitur Lainnya' },
     { id: 'latar-belakang', name: 'Latar Belakang' },
     { id: 'musik', name: 'Musik Latar' },
-  ]
+  ];
+
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  
+  const handleDragStart = (e, index) => { 
+    setDraggedIndex(index); 
+    e.dataTransfer.effectAllowed = "move"; 
+  };
+  
+  const handleDragOver = (e) => { 
+    e.preventDefault(); 
+    e.dataTransfer.dropEffect = "move"; 
+  };
+  
+  const handleDrop = (e, dropIndex) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
+    const currentOrder = content?.sectionOrder || ['cerita', 'mempelai', 'acara', 'galeri', 'rekening'];
+    const newOrder = [...currentOrder];
+    const item = newOrder[draggedIndex];
+    newOrder.splice(draggedIndex, 1);
+    newOrder.splice(dropIndex, 0, item);
+    update('sectionOrder', newOrder);
+    setDraggedIndex(null);
+  };
 
   const renderTabContent = () => {
     if (activeTab === 'general') return (
@@ -537,8 +600,14 @@ export default function ContentCms() {
       return (
         <div className="cms-repeat-list">
           <article className="cms-repeat-item">
-            <div className="cms-repeat-head"><strong>Pilih Musik Latar</strong></div>
-            <p className="cms-helper-text">Pilih salah satu lagu untuk diputar secara otomatis di latar belakang. Anda dapat mengunggah file .mp3 ke folder `cms/imported/music` di Supabase untuk menambahkannya ke daftar ini.</p>
+            <div className="cms-repeat-head">
+              <strong>Pilih Musik Latar</strong>
+              <label className="btn-primary" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', borderRadius: '4px', background: '#000', color: '#fff', fontSize: '14px' }}>
+                <Upload size={14} />
+                {uploading ? 'Mengupload...' : 'Upload Musik'}
+                <input type="file" accept="audio/*" style={{ display: 'none' }} onChange={uploadMusicFiles} disabled={uploading} />
+              </label>
+            </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
               {musicAssets.length === 0 ? (
@@ -557,12 +626,21 @@ export default function ContentCms() {
                           <audio src={music.public_url} controls style={{ height: '30px', marginTop: '8px' }} />
                         </div>
                       </div>
-                      <button 
-                        onClick={() => update('backgroundMusicUrl', music.public_url)}
-                        style={{ padding: '8px 16px', background: isSelected ? '#22c55e' : '#000', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, display: 'flex', gap: '8px', alignItems: 'center' }}
-                      >
-                        {isSelected ? <><Check size={16} /> Terpilih</> : 'Pilih Lagu ini'}
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button 
+                          onClick={() => update('backgroundMusicUrl', music.public_url)}
+                          style={{ padding: '8px 16px', background: isSelected ? '#22c55e' : '#000', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, display: 'flex', gap: '8px', alignItems: 'center' }}
+                        >
+                          {isSelected ? <><Check size={16} /> Terpilih</> : 'Pilih'}
+                        </button>
+                        <button 
+                          onClick={() => deleteMusicAsset(music)}
+                          style={{ padding: '8px', background: '#fee', color: '#e00', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                          title="Hapus Musik"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   )
                 })
@@ -685,14 +763,37 @@ export default function ContentCms() {
               <div className="cms-section-list-head">
                 <strong>Kategori Konten</strong>
               </div>
-              {tabs.map((tab, index) => (
+              {(content?.sectionOrder || ['cerita', 'mempelai', 'acara', 'galeri', 'rekening']).map((tabId, index) => (
+                <button 
+                  type="button" 
+                  key={tabId} 
+                  data-active={tabId === activeTab} 
+                  onClick={() => setActiveTab(tabId)}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, index)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: draggedIndex === index ? 0.5 : 1 }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className="cms-section-number">{String(index + 1).padStart(2, '0')}</span>
+                    <span className="cms-section-name">
+                      <strong>{SECTION_NAMES[tabId]}</strong>
+                    </span>
+                  </div>
+                  <GripVertical size={14} style={{ color: '#aaa', cursor: 'grab' }} />
+                </button>
+              ))}
+              
+              <hr style={{ margin: '15px 0', border: 'none', borderTop: '1px dashed #ccc' }} />
+              
+              {SETTING_TABS.map((tab) => (
                 <button 
                   type="button" 
                   key={tab.id} 
                   data-active={tab.id === activeTab} 
                   onClick={() => setActiveTab(tab.id)}
                 >
-                  <span className="cms-section-number">{String(index + 1).padStart(2, '0')}</span>
                   <span className="cms-section-name">
                     <strong>{tab.name}</strong>
                   </span>
@@ -704,7 +805,7 @@ export default function ContentCms() {
               <div className="cms-editor-heading">
                 <div>
                   <span>PENGATURAN KONTEN</span>
-                  <h2>{tabs.find(t => t.id === activeTab)?.name}</h2>
+                  <h2>{SECTION_NAMES[activeTab] || SETTING_TABS.find(t => t.id === activeTab)?.name}</h2>
                 </div>
               </div>
               {renderTabContent()}

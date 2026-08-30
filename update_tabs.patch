@@ -1,0 +1,104 @@
+--- components/admin/ContentCms.jsx
++++ components/admin/ContentCms.jsx
+@@ -2,6 +2,7 @@
+ 
+ import { useState, useEffect } from 'react'
+ import { supabase } from '@/lib/supabase'
+-import { Save, RefreshCw, ArrowLeft, Upload, Check, X, Image as ImageIcon, Trash2 } from 'lucide-react'
++import { Save, RefreshCw, ArrowLeft, Upload, Check, X, Image as ImageIcon, Trash2, GripVertical } from 'lucide-react'
+ import Link from 'next/link'
+ 
+@@ -223,17 +224,19 @@
+     setView('form')
+   }
+ 
+-  const tabs = [
+-    { id: 'general', name: 'Umum & Tanggal' },
+-    { id: 'mempelai', name: 'Data Mempelai' },
+-    { id: 'cerita', name: 'Ayat & Timeline' },
+-    { id: 'acara', name: 'Detail Acara' },
+-    { id: 'galeri', name: 'Galeri Foto' },
+-    { id: 'rekening', name: 'Rekening (Gift)' },
+-    { id: 'lainnya', name: 'Fitur Lainnya' },
+-    { id: 'latar-belakang', name: 'Latar Belakang' },
+-    { id: 'musik', name: 'Musik Latar' },
+-  ]
++  const SECTION_NAMES = {
++    'cerita': 'Ayat & Timeline',
++    'mempelai': 'Data Mempelai',
++    'acara': 'Detail Acara',
++    'galeri': 'Galeri Foto',
++    'rekening': 'Rekening (Gift)'
++  }
++  const SETTING_TABS = [
++    { id: 'general', name: 'Umum & Tanggal' },
++    { id: 'lainnya', name: 'Fitur Lainnya' },
++    { id: 'latar-belakang', name: 'Latar Belakang' },
++    { id: 'musik', name: 'Musik Latar' },
++  ]
++
++  const [draggedIndex, setDraggedIndex] = useState(null);
++  const handleDragStart = (e, index) => { setDraggedIndex(index); e.dataTransfer.effectAllowed = "move"; }
++  const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }
++  const handleDrop = (e, dropIndex) => {
++    e.preventDefault();
++    if (draggedIndex === null || draggedIndex === dropIndex) return;
++    const currentOrder = content?.sectionOrder || ['cerita', 'mempelai', 'acara', 'galeri', 'rekening'];
++    const newOrder = [...currentOrder];
++    const item = newOrder[draggedIndex];
++    newOrder.splice(draggedIndex, 1);
++    newOrder.splice(dropIndex, 0, item);
++    update('sectionOrder', newOrder);
++    setDraggedIndex(null);
++  }
+ 
+   const renderTabContent = () => {
+@@ -685,16 +702,40 @@
+               <div className="cms-section-list-head">
+                 <strong>Kategori Konten</strong>
+               </div>
+-              {tabs.map((tab, index) => (
++              {(content?.sectionOrder || ['cerita', 'mempelai', 'acara', 'galeri', 'rekening']).map((tabId, index) => (
+                 <button 
+                   type="button" 
+-                  key={tab.id} 
+-                  data-active={tab.id === activeTab} 
+-                  onClick={() => setActiveTab(tab.id)}
++                  key={tabId} 
++                  data-active={tabId === activeTab} 
++                  onClick={() => setActiveTab(tabId)}
++                  draggable
++                  onDragStart={(e) => handleDragStart(e, index)}
++                  onDragOver={handleDragOver}
++                  onDrop={(e) => handleDrop(e, index)}
++                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: draggedIndex === index ? 0.5 : 1 }}
+                 >
+-                  <span className="cms-section-number">{String(index + 1).padStart(2, '0')}</span>
+-                  <span className="cms-section-name">
+-                    <strong>{tab.name}</strong>
+-                  </span>
++                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
++                    <span className="cms-section-number">{String(index + 1).padStart(2, '0')}</span>
++                    <span className="cms-section-name">
++                      <strong>{SECTION_NAMES[tabId]}</strong>
++                    </span>
++                  </div>
++                  <GripVertical size={14} style={{ color: '#aaa', cursor: 'grab' }} />
+                 </button>
+               ))}
++              
++              <hr style={{ margin: '15px 0', border: 'none', borderTop: '1px dashed #ccc' }} />
++              
++              {SETTING_TABS.map((tab, index) => (
++                <button 
++                  type="button" 
++                  key={tab.id} 
++                  data-active={tab.id === activeTab} 
++                  onClick={() => setActiveTab(tab.id)}
++                >
++                  <span className="cms-section-name">
++                    <strong>{tab.name}</strong>
++                  </span>
++                </button>
++              ))}
+             </aside>

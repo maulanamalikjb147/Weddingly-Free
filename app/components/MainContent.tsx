@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { IoIosArrowUp } from "react-icons/io";
-import { FaInstagram } from "react-icons/fa";
+import { FaInstagram, FaCalendarAlt } from "react-icons/fa";
 import Link from "next/link";
 import { useInView } from "react-intersection-observer";
 import CountdownTimer from "./Countdown";
@@ -197,8 +197,8 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
               </h5>
             </div>
             <div>
-              <p className="mt-5 text-lg uppercase font-xs tracking-widest text-white">
-                {name ? `Dear ${name},` : "Welcome"}
+              <p className="mt-5 text-sm md:text-base font-legan tracking-widest text-white">
+                #roMAnSAsatuhati
               </p>
               {!isOpen ? (
                 <button
@@ -216,9 +216,11 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
             </div>
           </div>
         </div>
-        {isOpen && (
-          <>
-            {/* Slide 1 */}
+        {isOpen && (config.sectionOrder || ['cerita', 'mempelai', 'acara', 'galeri', 'rekening']).map(sectionKey => (
+          <Fragment key={sectionKey}>
+            {sectionKey === 'cerita' && (
+              <>
+                {/* Slide 1 */}
             <div
               className={`text-white h-screen flex pt-12 p-5 px-12 snap-start `}
               style={{
@@ -238,91 +240,6 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
                   {config.bibleVerseContent}
                 </p>
                 <p className="text-6xl mt-5 font-wonder">{config.coupleNames}</p>
-              </div>
-            </div>
-            {/* Slide Bride & Groom (Slide 1.5) */}
-            <div
-              className={`text-white h-screen flex flex-col justify-center items-center p-5 px-12 snap-start `}
-              style={{
-                backgroundImage: `url(${config.backgrounds?.bg_bride_groom || "/foto_1_samping.jpg"})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              <div
-                ref={slideBrideGroomRef}
-                className={` ${isSlideBrideGroomInView ? "active" : ""} fadeInMove text-center flex flex-col items-center justify-center`}
-              >
-                <h1 className="text-2xl font-ovo text-white uppercase mb-4">
-                  {config.brideGroomTitle}
-                </h1>
-                <p className="text-sm font-legan text-white mb-2">
-                  {config.brideGroomGreeting}
-                </p>
-                <p className="text-xs font-legan text-[#CCCCCC]">
-                  {config.brideGroomText}
-                </p>
-              </div>
-            </div>
-            {/* Slide 2 */}
-            <div
-              className={`text-white h-screen flex items-end pb-16 px-12 snap-start `}
-              style={{
-                backgroundImage: `url(${config.backgrounds?.slide_2 || "/slide_2.jpg"})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              {/* Display the content when the button is clicked */}
-              <div
-                ref={slide2Ref}
-                className={`fadeInMove ${isSlide2InView ? "active" : ""}  `}
-              >
-                <p className="font-legan text-sm my-2">The Bride</p>
-                <h1 className="text-xl md:text-3xl text-white  font-ovo">
-                  {config.bride}
-                </h1>
-                <h3 className="font-thesignature text-2xl">About {config.brideNickName},</h3>
-                <p className="text-sm mt-5 font-legan text-[#CCCCCC]">
-                  {config.brideBio}
-                </p>
-                <Link
-                  href={`https://www.instagram.com/${config.brideInstagram}`}
-                  target="_blank"
-                  className="cursor-pointer hover:bg-black text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#4E4E4E] w-fit px-4 py-2 text-[#CCCCCC]"
-                >
-                  <FaInstagram /> {config.brideInstagram}
-                </Link>
-              </div>
-            </div>
-            {/* Slide 3 */}
-            <div
-              className="snap-start  text-white h-screen flex items-end pb-16 px-12 "
-              style={{
-                backgroundImage: `url(${config.backgrounds?.slide_3 || "/slide_3.jpg"})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              <div
-                ref={slide3Ref}
-                className={`fadeInMove ${isSlide3InView ? "active" : ""}  `}
-              >
-                <p className="font-legan text-sm my-2">The Groom</p>
-                <h1 className="text-xl md:text-3xl text-white  font-ovo">
-                  {config.groom}
-                </h1>
-                <h3 className="font-thesignature text-2xl">About {config.groomNickName},</h3>
-                <p className="text-sm mt-5 font-legan text-[#CCCCCC]">
-                  {config.groomBio}
-                </p>
-                <Link
-                  href={`https://www.instagram.com/${config.groomInstagram}`}
-                  target="_blank"
-                  className="cursor-pointer hover:bg-black text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#4E4E4E] w-fit px-4 py-2 text-[#CCCCCC]"
-                >
-                  <FaInstagram /> {config.groomInstagram}
-                </Link>
               </div>
             </div>
             {/* Slide 4 */}
@@ -410,7 +327,97 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
                 </div>
               </div>
             </div>
-            {/* Slide 5 */}
+              </>
+            )}
+            {sectionKey === 'mempelai' && (
+              <>
+                {/* Slide Bride & Groom (Slide 1.5) */}
+            <div
+              className={`text-white h-screen flex flex-col justify-center items-center p-5 px-12 snap-start `}
+              style={{
+                backgroundImage: `url(${config.backgrounds?.bg_bride_groom || "/foto_1_samping.jpg"})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div
+                ref={slideBrideGroomRef}
+                className={` ${isSlideBrideGroomInView ? "active" : ""} fadeInMove text-center flex flex-col items-center justify-center`}
+              >
+                <p className="text-base md:text-lg font-legan text-white mb-4">
+                  {config.brideGroomGreeting}
+                </p>
+                <p className="text-sm md:text-base font-legan text-[#CCCCCC]">
+                  {config.brideGroomText}
+                </p>
+              </div>
+            </div>
+            {/* Slide 2 */}
+            <div
+              className={`text-white h-screen flex items-end pb-16 px-12 snap-start `}
+              style={{
+                backgroundImage: `url(${config.backgrounds?.slide_2 || "/slide_2.jpg"})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              {/* Display the content when the button is clicked */}
+              <div
+                ref={slide2Ref}
+                className={`fadeInMove ${isSlide2InView ? "active" : ""}  `}
+              >
+                <p className="font-legan text-sm my-2">The Bride</p>
+                <h1 className="text-xl md:text-3xl text-white  font-ovo">
+                  {config.bride}
+                </h1>
+                <h3 className="font-thesignature text-2xl">About {config.brideNickName},</h3>
+                <p className="text-sm mt-5 font-legan text-[#CCCCCC]">
+                  {config.brideBio}
+                </p>
+                <Link
+                  href={`https://www.instagram.com/${config.brideInstagram}`}
+                  target="_blank"
+                  className="cursor-pointer hover:bg-black text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#4E4E4E] w-fit px-4 py-2 text-[#CCCCCC]"
+                >
+                  <FaInstagram /> {config.brideInstagram}
+                </Link>
+              </div>
+            </div>
+            {/* Slide 3 */}
+            <div
+              className="snap-start  text-white h-screen flex items-end pb-16 px-12 "
+              style={{
+                backgroundImage: `url(${config.backgrounds?.slide_3 || "/slide_3.jpg"})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div
+                ref={slide3Ref}
+                className={`fadeInMove ${isSlide3InView ? "active" : ""}  `}
+              >
+                <p className="font-legan text-sm my-2">The Groom</p>
+                <h1 className="text-xl md:text-3xl text-white  font-ovo">
+                  {config.groom}
+                </h1>
+                <h3 className="font-thesignature text-2xl">About {config.groomNickName},</h3>
+                <p className="text-sm mt-5 font-legan text-[#CCCCCC]">
+                  {config.groomBio}
+                </p>
+                <Link
+                  href={`https://www.instagram.com/${config.groomInstagram}`}
+                  target="_blank"
+                  className="cursor-pointer hover:bg-black text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#4E4E4E] w-fit px-4 py-2 text-[#CCCCCC]"
+                >
+                  <FaInstagram /> {config.groomInstagram}
+                </Link>
+              </div>
+            </div>
+              </>
+            )}
+            {sectionKey === 'acara' && (
+              <>
+                {/* Slide 5 */}
             <div
               className="snap-start  text-white h-screen flex flex-col items-center px-12 "
               style={{
@@ -492,14 +499,34 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
                 </h1>
                 {/* Countdown Timer */}
                 <CountdownTimer eventDate={config.eventDate} />
+                
+                <Link
+                  href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=Wedding+of+${encodeURIComponent(config.coupleNames)}&dates=${new Date(config.eventDate).toISOString().replace(/-|:|\.\d\d\d/g, "")}/${new Date(new Date(config.eventDate).getTime() + 2 * 60 * 60 * 1000).toISOString().replace(/-|:|\.\d\d\d/g, "")}&details=${encodeURIComponent("Join us for our wedding celebration!")}`}
+                  target="_blank"
+                  className="cursor-pointer hover:bg-white/30 hover:scale-105 active:scale-95 text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-8 bg-white/20 border border-white/40 w-fit px-6 py-2.5 text-white transition-all backdrop-blur-sm shadow-lg"
+                >
+                  <FaCalendarAlt /> Save the Date
+                </Link>
               </div>
             </div>
-            
-            {/* Gallery Section */}
+              </>
+            )}
+            {sectionKey === 'galeri' && (
+              <>
+                {/* Gallery Section */}
             <GallerySection config={config} />
-
-            {/* Gifts Section */}
+              </>
+            )}
+            {sectionKey === 'rekening' && (
+              <>
+                {/* Gifts Section */}
             <GiftsSection config={config} />
+              </>
+            )}
+          </Fragment>
+        ))}
+        {isOpen && (
+          <>
             {/* Slide 7 */}
             {config.livestreaming.enabled && (
               <div

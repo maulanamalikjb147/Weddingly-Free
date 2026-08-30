@@ -69,7 +69,14 @@ export default function GiftsSection({ config }: Props) {
               </div>
               
               <div className="relative z-10 space-y-4">
-                <div className="w-10 h-8 rounded shadow-inner" style={{ background: "linear-gradient(135deg, #ebd197 0%, #b48834 100%)" }}></div>
+                <div className="w-10 h-8 rounded-md shadow-inner relative overflow-hidden flex items-center justify-center border border-black/10" style={{ background: "linear-gradient(135deg, #ebd197 0%, #d4a74a 50%, #b48834 100%)" }}>
+                  <svg viewBox="0 0 40 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0 opacity-40 mix-blend-multiply">
+                    <path d="M12 0V32M28 0V32" stroke="#4A3410" strokeWidth="1" />
+                    <path d="M0 10H12M28 10H40" stroke="#4A3410" strokeWidth="1" />
+                    <path d="M0 22H12M28 22H40" stroke="#4A3410" strokeWidth="1" />
+                    <rect x="14" y="10" width="12" height="12" rx="3" stroke="#4A3410" strokeWidth="1" />
+                  </svg>
+                </div>
                 <div className="font-mono text-xl tracking-[0.12em] text-white/90 drop-shadow-md">
                   {account.number}
                 </div>

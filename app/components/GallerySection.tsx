@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import type { WeddingConfig } from "@/lib/config";
 import Image from "next/image";
@@ -12,6 +12,18 @@ type Props = {
 export default function GallerySection({ config }: Props) {
   const { ref, inView } = useInView({ threshold: 0.2 });
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    if (!config.gallery || !config.gallery.enabled || !config.gallery.photos || config.gallery.photos.length === 0) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setSelectedIndex((prevIndex) => (prevIndex + 1) % config.gallery.photos.length);
+    }, 4000); // 4 seconds interval
+
+    return () => clearInterval(interval);
+  }, [config.gallery]);
 
   if (!config.gallery || !config.gallery.enabled || !config.gallery.photos || config.gallery.photos.length === 0) {
     return null;

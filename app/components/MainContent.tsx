@@ -17,9 +17,10 @@ type WeddingScreenProps = {
   name?: string;
   config: WeddingConfig;
   onOpenInvitation?: () => void;
+  isProceeded?: boolean;
 };
 
-const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) => {
+const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: WeddingScreenProps) => {
   const [fadeClass, setFadeClass] = useState("opacity-0");
   const [isOpen, setIsOpen] = useState(false);
 
@@ -198,7 +199,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
             </div>
             <div>
               <p className="mt-5 text-sm md:text-base font-legan tracking-widest text-white">
-                Dear, {name || "Tamu Undangan"}
+                {isProceeded ? '#roMAnSAsatuhati' : `Dear, ${name || 'Tamu Undangan'}`}
               </p>
               {!isOpen ? (
                 <button

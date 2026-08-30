@@ -18,6 +18,7 @@ export default function ClientHomeWrapper({ slug, guest: initialGuest, config }:
   const [guest, setGuest] = useState<WeddingGuest | null>(initialGuest);
   const [name, setName] = useState<string>("");
   const [qrOpen, setQrOpen] = useState(false);
+  const [isProceeded, setIsProceeded] = useState(false);
 
   useEffect(() => {
     let extractedName = "";
@@ -59,7 +60,7 @@ export default function ClientHomeWrapper({ slug, guest: initialGuest, config }:
   return (
     <div className="h-screen relative overflow-hidden">
       <ScreenStart config={config} isRoot={slug === ""} />
-      {showContent && <MainContent name={name} config={config} onOpenInvitation={handleOpenInvitation} />}
+      {showContent && <MainContent name={name} config={config} onOpenInvitation={handleOpenInvitation} isProceeded={isProceeded} />}
       
       {guest && (
         <QrPrelude 
@@ -67,6 +68,7 @@ export default function ClientHomeWrapper({ slug, guest: initialGuest, config }:
           open={qrOpen} 
           onContinue={() => {
             setQrOpen(false);
+            setIsProceeded(true);
           }} 
         />
       )}

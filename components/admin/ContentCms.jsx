@@ -341,7 +341,7 @@ export default function ContentCms() {
       </div>
     )
 
-    if (activeTab === 'cerita') return (
+    if (activeTab === 'ayat') return (
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
           <div className="cms-repeat-head"><strong>Ayat Alkitab / Kutipan Suci</strong></div>
@@ -350,7 +350,12 @@ export default function ContentCms() {
             <TextArea label="Isi Kutipan" value={content.bibleVerseContent} onChange={(v) => update('bibleVerseContent', v)} />
           </div>
         </article>
-        <article className="cms-repeat-item mt-4">
+      </div>
+    )
+
+    if (activeTab === 'timeline') return (
+      <div className="cms-repeat-list">
+        <article className="cms-repeat-item">
           <div className="cms-repeat-head"><strong>Timeline Cerita</strong></div>
           <div className="cms-fields-grid">
             <Field label="Tahun/Judul 1" value={content.timeline_1} onChange={(v) => update('timeline_1', v)} />

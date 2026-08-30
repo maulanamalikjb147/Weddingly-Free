@@ -260,7 +260,8 @@ export default function ContentCms() {
   }
 
   const SECTION_NAMES = {
-    'cerita': 'Ayat & Timeline',
+    'ayat': 'Ayat Alkitab',
+    'timeline': 'Timeline Cerita',
     'mempelai': 'Data Mempelai',
     'acara': 'Detail Acara',
     'galeri': 'Galeri Foto',
@@ -289,7 +290,7 @@ export default function ContentCms() {
   const handleDrop = (e, dropIndex) => {
     e.preventDefault();
     if (draggedIndex === null || draggedIndex === dropIndex) return;
-    const currentOrder = content?.sectionOrder || ['cerita', 'mempelai', 'acara', 'galeri', 'rekening'];
+    const currentOrder = content?.sectionOrder || ['ayat', 'timeline', 'mempelai', 'acara', 'galeri', 'rekening'];
     const newOrder = [...currentOrder];
     const item = newOrder[draggedIndex];
     newOrder.splice(draggedIndex, 1);
@@ -763,7 +764,7 @@ export default function ContentCms() {
               <div className="cms-section-list-head">
                 <strong>Kategori Konten</strong>
               </div>
-              {(content?.sectionOrder || ['cerita', 'mempelai', 'acara', 'galeri', 'rekening']).map((tabId, index) => (
+              {(content?.sectionOrder || ['ayat', 'timeline', 'mempelai', 'acara', 'galeri', 'rekening']).map((tabId, index) => (
                 <button 
                   type="button" 
                   key={tabId} 
@@ -793,8 +794,9 @@ export default function ContentCms() {
                   key={tab.id} 
                   data-active={tab.id === activeTab} 
                   onClick={() => setActiveTab(tab.id)}
+                  style={{ display: 'block', textAlign: 'left' }}
                 >
-                  <span className="cms-section-name">
+                  <span className="cms-section-name" style={{ display: 'inline-block', width: '100%' }}>
                     <strong>{tab.name}</strong>
                   </span>
                 </button>

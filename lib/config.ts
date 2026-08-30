@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
 export const defaultConfig = {
-    sectionOrder: ['cerita', 'mempelai', 'acara', 'galeri', 'rekening'],
+    sectionOrder: ['ayat', 'timeline', 'mempelai', 'acara', 'galeri', 'rekening'],
     coupleNames: process.env.NEXT_PUBLIC_COUPLE_NAMES || "Default Names",
     eventDate: process.env.NEXT_PUBLIC_EVENT_DATE || "2025-01-01T00:00:00",
     groom: process.env.NEXT_PUBLIC_GROOM_NAME || "Default Groom",

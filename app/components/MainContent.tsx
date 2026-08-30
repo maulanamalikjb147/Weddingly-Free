@@ -198,7 +198,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
             </div>
             <div>
               <p className="mt-5 text-sm md:text-base font-legan tracking-widest text-white">
-                #roMAnSAsatuhati
+                Dear, {name || "Tamu Undangan"}
               </p>
               {!isOpen ? (
                 <button
@@ -216,9 +216,9 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
             </div>
           </div>
         </div>
-        {isOpen && (config.sectionOrder || ['cerita', 'mempelai', 'acara', 'galeri', 'rekening']).map(sectionKey => (
+        {isOpen && (config.sectionOrder || ['ayat', 'timeline', 'mempelai', 'acara', 'galeri', 'rekening']).map(sectionKey => (
           <Fragment key={sectionKey}>
-            {sectionKey === 'cerita' && (
+            {sectionKey === 'ayat' && (
               <>
                 {/* Slide 1 */}
             <div
@@ -242,7 +242,12 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
                 <p className="text-6xl mt-5 font-wonder">{config.coupleNames}</p>
               </div>
             </div>
-            {/* Slide 4 */}
+              </>
+            )}
+
+            {sectionKey === 'timeline' && (
+              <>
+                {/* Slide 4 */}
             <div
               className="snap-start  text-white h-screen pt-8 flex px-12 "
               style={{
@@ -329,7 +334,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
             </div>
               </>
             )}
-            {sectionKey === 'mempelai' && (
+{sectionKey === 'mempelai' && (
               <>
                 {/* Slide Bride & Groom (Slide 1.5) */}
             <div

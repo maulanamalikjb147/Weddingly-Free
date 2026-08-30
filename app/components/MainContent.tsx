@@ -464,13 +464,16 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                     <p className="text-sm text-center  font-legan text-white">
                       {config.holyMatrimony.place} <br /> {config.holyMatrimony.place_details}
                     </p>
-                    <Link
-                      href={config.holyMatrimony.googleMapsLink}
-                      target="_blank"
-                      className="cursor-pointer hover:text-white/20 text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#808080] w-fit px-4 py-2 text-white"
-                    >
-                      Google Maps
-                    </Link>
+                    {/* Hanya tampil kalau lokasi BEDA dengan resepsi */}
+                    {config.holyMatrimony.googleMapsLink !== config.weddingReception.googleMapsLink && (
+                      <Link
+                        href={config.holyMatrimony.googleMapsLink}
+                        target="_blank"
+                        className="cursor-pointer hover:text-white/20 text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#808080] w-fit px-4 py-2 text-white"
+                      >
+                        Google Maps
+                      </Link>
+                    )}
                   </div>
                 )}
 
@@ -482,14 +485,30 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                     <p className="text-sm text-center  font-legan text-white">
                       {config.weddingReception.place} <br /> {config.weddingReception.place_details}
                     </p>
-                    <Link
-                      href={config.weddingReception.googleMapsLink}
-                      target="_blank"
-                      className="cursor-pointer hover:text-white/20 text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#808080] w-fit px-4 py-2 text-white"
-                    >
-                      Google Maps
-                    </Link>
+                    {/* Hanya tampil kalau lokasi BEDA dengan akad */}
+                    {config.weddingReception.googleMapsLink !== config.holyMatrimony.googleMapsLink && (
+                      <Link
+                        href={config.weddingReception.googleMapsLink}
+                        target="_blank"
+                        className="cursor-pointer hover:text-white/20 text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#808080] w-fit px-4 py-2 text-white"
+                      >
+                        Google Maps
+                      </Link>
+                    )}
                   </div>
+                )}
+
+                {/* 1 tombol Maps bersama kalau lokasi sama */}
+                {config.holyMatrimony.enabled && config.weddingReception.enabled &&
+                  config.holyMatrimony.googleMapsLink === config.weddingReception.googleMapsLink &&
+                  config.holyMatrimony.googleMapsLink && (
+                  <Link
+                    href={config.holyMatrimony.googleMapsLink}
+                    target="_blank"
+                    className="cursor-pointer hover:text-white/20 text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-6 bg-[#808080] w-fit px-4 py-2 text-white"
+                  >
+                    Google Maps
+                  </Link>
                 )}
               </div>
             </div>

@@ -278,20 +278,20 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
                 ref={slide2Ref}
                 className={`fadeInMove ${isSlide2InView ? "active" : ""}  `}
               >
-                <p className="font-legan text-sm my-2">The Groom</p>
+                <p className="font-legan text-sm my-2">The Bride</p>
                 <h1 className="text-xl md:text-3xl text-white  font-ovo">
-                  {config.groom}
+                  {config.bride}
                 </h1>
-                <h3 className="font-thesignature text-2xl">About {config.groomNickName},</h3>
+                <h3 className="font-thesignature text-2xl">About {config.brideNickName},</h3>
                 <p className="text-sm mt-5 font-legan text-[#CCCCCC]">
-                  {config.groomBio}
+                  {config.brideBio}
                 </p>
                 <Link
-                  href={`https://www.instagram.com/${config.groomInstagram}`}
+                  href={`https://www.instagram.com/${config.brideInstagram}`}
                   target="_blank"
                   className="cursor-pointer hover:bg-black text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#4E4E4E] w-fit px-4 py-2 text-[#CCCCCC]"
                 >
-                  <FaInstagram /> {config.groomInstagram}
+                  <FaInstagram /> {config.brideInstagram}
                 </Link>
               </div>
             </div>
@@ -308,20 +308,20 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
                 ref={slide3Ref}
                 className={`fadeInMove ${isSlide3InView ? "active" : ""}  `}
               >
-                <p className="font-legan text-sm my-2">The Bride</p>
+                <p className="font-legan text-sm my-2">The Groom</p>
                 <h1 className="text-xl md:text-3xl text-white  font-ovo">
-                  {config.bride}
+                  {config.groom}
                 </h1>
-                <h3 className="font-thesignature text-2xl">About {config.brideNickName},</h3>
+                <h3 className="font-thesignature text-2xl">About {config.groomNickName},</h3>
                 <p className="text-sm mt-5 font-legan text-[#CCCCCC]">
-                  {config.brideBio}
+                  {config.groomBio}
                 </p>
                 <Link
-                  href={`https://www.instagram.com/${config.brideInstagram}`}
+                  href={`https://www.instagram.com/${config.groomInstagram}`}
                   target="_blank"
                   className="cursor-pointer hover:bg-black text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#4E4E4E] w-fit px-4 py-2 text-[#CCCCCC]"
                 >
-                  <FaInstagram /> {config.brideInstagram}
+                  <FaInstagram /> {config.groomInstagram}
                 </Link>
               </div>
             </div>
@@ -422,7 +422,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
               <div
                 ref={slide5Ref}
                 className={` ${isSlide5InView ? "active" : ""
-                  }  fadeInMove flex items-center flex-col pt-32 `}
+                  }  fadeInMove flex items-center flex-col pt-12 `}
               >
                 <h3 className="uppercase font-legan text-xs tracking-wide mt-5 mb-2">
                   save our date
@@ -657,7 +657,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) =
               </div>
 
               <footer className="flex flex-col items-center mt-8">
-                <p className="text-[0.5rem] uppercase text-center font-legan tracking-widest">
+                <p className="text-[0.5rem] text-center font-legan tracking-widest">
                   #roMAnSAsatuhati
                 </p>
               </footer>

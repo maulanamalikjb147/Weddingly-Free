@@ -44,11 +44,12 @@ export default function ClientHomeWrapper({ slug, guest: initialGuest, config }:
         });
     }
 
-    const contentTimer = setTimeout(() => {
-      setShowContent(true);
-    }, 7000);
-
-    return () => clearTimeout(contentTimer);
+    if (slug !== "") {
+      const contentTimer = setTimeout(() => {
+        setShowContent(true);
+      }, 7000);
+      return () => clearTimeout(contentTimer);
+    }
   }, [slug, initialGuest]);
 
   const handleOpenInvitation = () => {
@@ -57,7 +58,7 @@ export default function ClientHomeWrapper({ slug, guest: initialGuest, config }:
 
   return (
     <div className="h-screen relative overflow-hidden">
-      <ScreenStart config={config} />
+      <ScreenStart config={config} isRoot={slug === ""} />
       {showContent && <MainContent name={name} config={config} onOpenInvitation={handleOpenInvitation} />}
       
       {guest && (

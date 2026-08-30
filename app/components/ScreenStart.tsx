@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { TypeAnimation } from "react-type-animation";
 import type { WeddingConfig } from "@/lib/config";
 
-const ScreenStart = ({ config }: { config: WeddingConfig }) => {
+const ScreenStart = ({ config, isRoot = false }: { config: WeddingConfig, isRoot?: boolean }) => {
   const [showScreenStart, setShowScreenStart] = useState(true);
   const [fadeClass, setFadeClass] = useState("opacity-100");
 
@@ -13,21 +13,26 @@ const ScreenStart = ({ config }: { config: WeddingConfig }) => {
       setFadeClass("opacity-100");
     }, 100); 
 
-    
-    const fadeOutTimer = setTimeout(() => {
-      setFadeClass("opacity-0");
-    }, 6000); 
+    if (!isRoot) {
+      const fadeOutTimer = setTimeout(() => {
+        setFadeClass("opacity-0");
+      }, 6000); 
 
-    const removeScreenStart = setTimeout(() => {
-      setShowScreenStart(false);
-    }, 7000);
+      const removeScreenStart = setTimeout(() => {
+        setShowScreenStart(false);
+      }, 7000);
+
+      return () => {
+        clearTimeout(fadeInTimer);
+        clearTimeout(fadeOutTimer);
+        clearTimeout(removeScreenStart);
+      };
+    }
 
     return () => {
       clearTimeout(fadeInTimer);
-      clearTimeout(fadeOutTimer);
-      clearTimeout(removeScreenStart);
     };
-  }, []);
+  }, [isRoot]);
 
   if (!showScreenStart) {
     return null;
@@ -51,7 +56,7 @@ const ScreenStart = ({ config }: { config: WeddingConfig }) => {
           display: "inline-block",
         }}
         className="font-legan text-sm"
-        repeat={0} // Animasi terus diulang
+        repeat={Infinity} // Animasi terus diulang
       />
     </div>
   );

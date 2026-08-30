@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 
 export default function MusicPlayer({ src, isInvitationOpen }: { src: string; isInvitationOpen: boolean }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -32,9 +33,13 @@ export default function MusicPlayer({ src, isInvitationOpen }: { src: string; is
   return (
     <>
       <audio ref={audioRef} src={src} preload="auto" loop />
-      <div 
-        className="fixed bottom-4 right-4 z-50 cursor-pointer p-2 bg-black/30 rounded-full backdrop-blur-sm"
+      <motion.div 
+        drag
+        dragMomentum={false}
+        className="fixed bottom-4 right-4 z-[999] cursor-grab active:cursor-grabbing p-2 bg-black/30 rounded-full backdrop-blur-sm"
         onClick={togglePlay}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
         <div 
           className={`w-12 h-12 rounded-full border-2 border-[#333] flex items-center justify-center bg-black relative shadow-lg ${isPlaying ? "animate-[spin_4s_linear_infinite]" : ""}`}
@@ -50,7 +55,7 @@ export default function MusicPlayer({ src, isInvitationOpen }: { src: string; is
             <div className="w-1 h-1 bg-black rounded-full" />
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }

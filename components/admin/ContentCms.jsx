@@ -262,10 +262,15 @@ export default function ContentCms() {
   const SECTION_NAMES = {
     'ayat': 'Ayat Alkitab',
     'timeline': 'Timeline Cerita',
-    'mempelai': 'Data Mempelai',
+    'pengantar': 'Pengantar Mempelai',
+    'cpw': 'Data CPW',
+    'cpp': 'Data CPP',
     'acara': 'Detail Acara',
+    'countdown': 'Countdown',
     'galeri': 'Galeri Foto',
-    'rekening': 'Rekening (Gift)'
+    'rekening': 'Rekening (Gift)',
+    'rsvp': 'RSVP & Wishes',
+    'thankyou': 'Pesan Penutup',
   };
   
   const SETTING_TABS = [
@@ -290,7 +295,7 @@ export default function ContentCms() {
   const handleDrop = (e, dropIndex) => {
     e.preventDefault();
     if (draggedIndex === null || draggedIndex === dropIndex) return;
-    const currentOrder = content?.sectionOrder || ['ayat', 'timeline', 'mempelai', 'acara', 'galeri', 'rekening'];
+    const currentOrder = content?.sectionOrder || ['ayat', 'timeline', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'galeri', 'rekening', 'rsvp', 'thankyou'];
     const newOrder = [...currentOrder];
     const item = newOrder[draggedIndex];
     newOrder.splice(draggedIndex, 1);
@@ -310,7 +315,7 @@ export default function ContentCms() {
       </div>
     )
 
-    if (activeTab === 'mempelai') return (
+    if (activeTab === 'pengantar') return (
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
           <div className="cms-repeat-head"><strong>Sesi Pengantar Mempelai</strong></div>
@@ -320,8 +325,13 @@ export default function ContentCms() {
             <TextArea label="Teks Doa / Pengantar" value={content.brideGroomText} onChange={(v) => update('brideGroomText', v)} rows={3} />
           </div>
         </article>
-        <article className="cms-repeat-item mt-4">
-          <div className="cms-repeat-head"><strong>Mempelai Wanita</strong></div>
+      </div>
+    )
+
+    if (activeTab === 'cpw') return (
+      <div className="cms-repeat-list">
+        <article className="cms-repeat-item">
+          <div className="cms-repeat-head"><strong>Mempelai Wanita (CPW)</strong></div>
           <div className="cms-fields-grid">
             <Field label="Nama Lengkap" value={content.bride} onChange={(v) => update('bride', v)} />
             <Field label="Nama Panggilan" value={content.brideNickName} onChange={(v) => update('brideNickName', v)} />
@@ -329,8 +339,13 @@ export default function ContentCms() {
             <TextArea label="Bio / Detail Orang Tua" value={content.brideBio} onChange={(v) => update('brideBio', v)} />
           </div>
         </article>
-        <article className="cms-repeat-item mt-4">
-          <div className="cms-repeat-head"><strong>Mempelai Pria</strong></div>
+      </div>
+    )
+
+    if (activeTab === 'cpp') return (
+      <div className="cms-repeat-list">
+        <article className="cms-repeat-item">
+          <div className="cms-repeat-head"><strong>Mempelai Pria (CPP)</strong></div>
           <div className="cms-fields-grid">
             <Field label="Nama Lengkap" value={content.groom} onChange={(v) => update('groom', v)} />
             <Field label="Nama Panggilan" value={content.groomNickName} onChange={(v) => update('groomNickName', v)} />
@@ -375,13 +390,13 @@ export default function ContentCms() {
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
           <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <strong>Pemberkatan / Akad (Holy Matrimony)</strong>
+            <strong>Pemberkatan / Akad Nikah</strong>
             <Toggle label="Aktifkan" checked={content.holyMatrimony.enabled} onChange={(v) => updateNested('holyMatrimony', 'enabled', v)} />
           </div>
           {content.holyMatrimony.enabled && (
             <div className="cms-fields-grid">
               <Field label="Waktu" value={content.holyMatrimony.time} onChange={(v) => updateNested('holyMatrimony', 'time', v)} />
-              <Field label="Nama Tempat/Gereja" value={content.holyMatrimony.place} onChange={(v) => updateNested('holyMatrimony', 'place', v)} />
+              <Field label="Nama Tempat" value={content.holyMatrimony.place} onChange={(v) => updateNested('holyMatrimony', 'place', v)} />
               <TextArea label="Alamat Detail" value={content.holyMatrimony.place_details} onChange={(v) => updateNested('holyMatrimony', 'place_details', v)} rows={2} />
               <Field label="Link Google Maps" value={content.holyMatrimony.googleMapsLink} onChange={(v) => updateNested('holyMatrimony', 'googleMapsLink', v)} />
             </div>
@@ -397,9 +412,35 @@ export default function ContentCms() {
               <Field label="Waktu" value={content.weddingReception.time} onChange={(v) => updateNested('weddingReception', 'time', v)} />
               <Field label="Nama Tempat" value={content.weddingReception.place} onChange={(v) => updateNested('weddingReception', 'place', v)} />
               <TextArea label="Alamat Detail" value={content.weddingReception.place_details} onChange={(v) => updateNested('weddingReception', 'place_details', v)} rows={2} />
-              <Field label="Link Google Maps" value={content.weddingReception.googleMapsLink} onChange={(v) => updateNested('weddingReception', 'googleMapsLink', v)} />
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+                <div style={{ flex: 1 }}>
+                  <Field label="Link Google Maps" value={content.weddingReception.googleMapsLink} onChange={(v) => updateNested('weddingReception', 'googleMapsLink', v)} />
+                </div>
+                {content.holyMatrimony.enabled && content.holyMatrimony.googleMapsLink && (
+                  <button
+                    type="button"
+                    onClick={() => updateNested('weddingReception', 'googleMapsLink', content.holyMatrimony.googleMapsLink)}
+                    style={{ padding: '8px 12px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', whiteSpace: 'nowrap', marginBottom: '4px' }}
+                    title="Salin link Maps dari Akad"
+                  >
+                    📌 Samakan dengan Akad
+                  </button>
+                )}
+              </div>
             </div>
           )}
+        </article>
+      </div>
+    )
+
+    if (activeTab === 'countdown') return (
+      <div className="cms-repeat-list">
+        <article className="cms-repeat-item">
+          <div className="cms-repeat-head"><strong>Countdown & Tanggal Acara</strong></div>
+          <p className="cms-helper-text" style={{ marginTop: '8px', color: '#666', fontSize: '13px' }}>Tanggal acara diatur di tab <strong>Umum &amp; Tanggal</strong>. Section ini akan otomatis menampilkan countdown dan tombol Save the Date ke Google Calendar.</p>
+          <div className="cms-fields-grid" style={{ marginTop: '12px' }}>
+            <Field label="Nama Pasangan (untuk Google Calendar)" value={content.coupleNames} onChange={(v) => update('coupleNames', v)} />
+          </div>
         </article>
       </div>
     )
@@ -432,10 +473,14 @@ export default function ContentCms() {
             </div>
           )}
         </article>
+      </div>
+    )
 
-        <article className="cms-repeat-item mt-4">
+    if (activeTab === 'rsvp') return (
+      <div className="cms-repeat-list">
+        <article className="cms-repeat-item">
           <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <strong>Fitur RSVP</strong>
+            <strong>RSVP & Ucapan Selamat</strong>
             <Toggle label="Aktifkan" checked={content.rsvp.enabled} onChange={(v) => updateNested('rsvp', 'enabled', v)} />
           </div>
           {content.rsvp.enabled && (
@@ -444,8 +489,12 @@ export default function ContentCms() {
             </div>
           )}
         </article>
+      </div>
+    )
 
-        <article className="cms-repeat-item mt-4">
+    if (activeTab === 'thankyou') return (
+      <div className="cms-repeat-list">
+        <article className="cms-repeat-item">
           <div className="cms-repeat-head"><strong>Pesan Penutup (Thank You)</strong></div>
           <div className="cms-fields-grid">
             <Field label="Judul" value={content.thankyou} onChange={(v) => update('thankyou', v)} />
@@ -769,7 +818,7 @@ export default function ContentCms() {
               <div className="cms-section-list-head">
                 <strong>Kategori Konten</strong>
               </div>
-              {(content?.sectionOrder || ['ayat', 'timeline', 'mempelai', 'acara', 'galeri', 'rekening']).map((tabId, index) => (
+              {(content?.sectionOrder || ['ayat', 'timeline', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'galeri', 'rekening', 'rsvp', 'thankyou']).map((tabId, index) => (
                 <button 
                   type="button" 
                   key={tabId} 

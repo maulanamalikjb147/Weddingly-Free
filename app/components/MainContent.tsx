@@ -217,7 +217,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             </div>
           </div>
         </div>
-        {isOpen && (config.sectionOrder || ['ayat', 'timeline', 'mempelai', 'acara', 'galeri', 'rekening']).map(sectionKey => (
+        {isOpen && (config.sectionOrder || ['ayat', 'timeline', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'galeri', 'rekening', 'rsvp', 'thankyou']).map(sectionKey => (
           <Fragment key={sectionKey}>
             {sectionKey === 'ayat' && (
               <>
@@ -245,7 +245,6 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             </div>
               </>
             )}
-
             {sectionKey === 'timeline' && (
               <>
                 {/* Slide 4 */}
@@ -335,7 +334,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             </div>
               </>
             )}
-{sectionKey === 'mempelai' && (
+            {sectionKey === 'pengantar' && (
               <>
                 {/* Slide Bride & Groom (Slide 1.5) */}
             <div
@@ -358,7 +357,11 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 </p>
               </div>
             </div>
-            {/* Slide 2 */}
+              </>
+            )}
+            {sectionKey === 'cpw' && (
+              <>
+                {/* Slide 2 */}
             <div
               className={`text-white h-screen flex items-end pb-16 px-12 snap-start `}
               style={{
@@ -389,7 +392,11 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 </Link>
               </div>
             </div>
-            {/* Slide 3 */}
+              </>
+            )}
+            {sectionKey === 'cpp' && (
+              <>
+                {/* Slide 3 */}
             <div
               className="snap-start  text-white h-screen flex items-end pb-16 px-12 "
               style={{
@@ -486,7 +493,11 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 )}
               </div>
             </div>
-            {/* Slide 6 */}
+              </>
+            )}
+            {sectionKey === 'countdown' && (
+              <>
+                {/* Slide 6 */}
             <div
               className="snap-start  text-white h-screen flex flex-col items-center justify-end pb-16 px-12 "
               style={{
@@ -529,94 +540,9 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <GiftsSection config={config} />
               </>
             )}
-          </Fragment>
-        ))}
-        {isOpen && (
-          <>
-            {/* Slide 7 */}
-            {config.livestreaming.enabled && (
-              <div
-                className="snap-start  text-white h-screen flex flex-col justify-between pt-16 pb-32 px-12 "
-                style={{
-                  backgroundImage: `url(${config.backgrounds?.slide_7 || "/foto_1_samping.jpg"})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
-                <h1
-                  ref={slide7Ref}
-                  className={`text-2xl text-white  font-ovo fadeInMoveSlow ${isSlide7InView ? "active" : ""
-                    }`}
-                >
-                  JOIN OUR EXCLUSIVE LIVE STREAMING EVENT
-                </h1>
-
-                <div
-                  className={`mt-5 mx-auto flex flex-col fadeInMove ${isSlide7InView ? "active" : ""
-                    }`}
-                  ref={slide7Ref}
-                >
-                  <h3 className="uppercase font-ovo text-sm mt-5 mb-2">
-                    {new Date(config.eventDate).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                    <br /> {config.livestreaming.time}
-                  </h3>
-                  <p className="text-sm font-legan text-white">
-                    {config.livestreaming.detail}
-                  </p>
-                  <Link
-                    href={config.livestreaming.link}
-                    target="_blank"
-                    className="cursor-pointer hover:text-white/20 text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#3B3B3B] w-fit px-6 py-2 text-white"
-                  >
-                    Join Live Streaming
-                  </Link>
-                </div>
-              </div>)}
-            {/* SLIDE 8 */}
-            {config.prewedding.enabled && (
-              <div
-                className="snap-start text-white h-screen flex flex-col justify-center pt-16 pb-16 px-8 "
-                style={{
-                  backgroundImage: `url(${config.backgrounds?.slide_8 || "/slide_8.jpg"})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
-                <div
-                  ref={slide8Ref}
-                  className={`${isSlide8InView ? "active" : ""} fadeInMove `}
-                >
-                  <h1 className="text-3xl text-white  font-ovo text-center uppercase">
-                    Unveiling Our Prewedding Story
-                  </h1>
-                  <div
-                    className="mt-10 mx-auto w-full max-w-2xl relative"
-                    style={{ paddingBottom: "56.25%", height: 0 }}
-                  >
-                    <iframe
-                      className="absolute top-0 left-0 w-full h-full"
-                      src={`https://www.youtube.com/embed/${config.prewedding.link}?autoplay=1&mute=1&loop=1`}
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                      allowFullScreen
-                    ></iframe>
-                  </div>
-
-                  <div className="-mt-12 w-72 transform skew-x-6 drop-shadow">
-                    <p className="text-3xl font-thesignature text-white/80 ">
-                      {config.prewedding.detail}
-                    </p>
-                  </div>
-                </div>
-              </div>)}
-
-            {/* SLIDE 9 */}
+            {sectionKey === 'rsvp' && (
+              <>
+                {/* SLIDE 9 */}
             {config.rsvp.enabled && (
             <div
               className="snap-start text-white h-screen flex flex-col justify-center pt-16 pb-16 px-8"
@@ -661,8 +587,11 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 <WishesList refreshTrigger={refreshTrigger} />
               </div>
             </div>
-
-            {/* SLIDE AKHIR */}
+              </>
+            )}
+            {sectionKey === 'thankyou' && (
+              <>
+                {/* SLIDE AKHIR */}
             <div
               className="snap-start text-white h-screen flex flex-col justify-end pt-16 pb-16 px-12 "
               style={{
@@ -697,6 +626,97 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             </div>
           </>
         )}
+          </Fragment>
+        ))}
+        {isOpen && config.livestreaming.enabled && (
+          <>
+            {/* Slide 7 - Livestreaming */}
+            {/* Slide 7 */}
+            {config.livestreaming.enabled && (
+              <div
+                className="snap-start  text-white h-screen flex flex-col justify-between pt-16 pb-32 px-12 "
+                style={{
+                  backgroundImage: `url(${config.backgrounds?.slide_7 || "/foto_1_samping.jpg"})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                <h1
+                  ref={slide7Ref}
+                  className={`text-2xl text-white  font-ovo fadeInMoveSlow ${isSlide7InView ? "active" : ""
+                    }`}
+                >
+                  JOIN OUR EXCLUSIVE LIVE STREAMING EVENT
+                </h1>
+
+                <div
+                  className={`mt-5 mx-auto flex flex-col fadeInMove ${isSlide7InView ? "active" : ""
+                    }`}
+                  ref={slide7Ref}
+                >
+                  <h3 className="uppercase font-ovo text-sm mt-5 mb-2">
+                    {new Date(config.eventDate).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                    <br /> {config.livestreaming.time}
+                  </h3>
+                  <p className="text-sm font-legan text-white">
+                    {config.livestreaming.detail}
+                  </p>
+                  <Link
+                    href={config.livestreaming.link}
+                    target="_blank"
+                    className="cursor-pointer hover:text-white/20 text-sm rounded-full flex items-center gap-x-2 text-center font-legan mt-5 bg-[#3B3B3B] w-fit px-6 py-2 text-white"
+                  >
+                    Join Live Streaming
+                  </Link>
+                </div>
+              </div>)}
+            {/* SLIDE 8 - Prewedding */}
+            {/* SLIDE 8 */}
+            {config.prewedding.enabled && (
+              <div
+                className="snap-start text-white h-screen flex flex-col justify-center pt-16 pb-16 px-8 "
+                style={{
+                  backgroundImage: `url(${config.backgrounds?.slide_8 || "/slide_8.jpg"})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                <div
+                  ref={slide8Ref}
+                  className={`${isSlide8InView ? "active" : ""} fadeInMove `}
+                >
+                  <h1 className="text-3xl text-white  font-ovo text-center uppercase">
+                    Unveiling Our Prewedding Story
+                  </h1>
+                  <div
+                    className="mt-10 mx-auto w-full max-w-2xl relative"
+                    style={{ paddingBottom: "56.25%", height: 0 }}
+                  >
+                    <iframe
+                      className="absolute top-0 left-0 w-full h-full"
+                      src={`https://www.youtube.com/embed/${config.prewedding.link}?autoplay=1&mute=1&loop=1`}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+
+                  <div className="-mt-12 w-72 transform skew-x-6 drop-shadow">
+                    <p className="text-3xl font-thesignature text-white/80 ">
+                      {config.prewedding.detail}
+                    </p>
+                  </div>
+                </div>
+              </div>)}
+          </>
+        )}
+
       </div>
       {/* Audio Element */}
       <MusicPlayer src={config.backgroundMusicUrl} isInvitationOpen={isOpen} />

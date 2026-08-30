@@ -59,6 +59,7 @@ export default function ContentCms() {
   const [musicAssets, setMusicAssets] = useState([])
   const [uploading, setUploading] = useState(false)
   const [mediaTarget, setMediaTarget] = useState('galeri') // 'galeri' or background keys
+  const [sameAsAkad, setSameAsAkad] = useState(false)
   const update = (key, value) => {
     setContent((current) => ({ ...current, [key]: value }))
   }
@@ -386,52 +387,107 @@ export default function ContentCms() {
       </div>
     )
 
-    if (activeTab === 'acara') return (
-      <div className="cms-repeat-list">
-        <article className="cms-repeat-item">
-          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <strong>Pemberkatan / Akad Nikah</strong>
-            <Toggle label="Aktifkan" checked={content.holyMatrimony.enabled} onChange={(v) => updateNested('holyMatrimony', 'enabled', v)} />
-          </div>
-          {content.holyMatrimony.enabled && (
-            <div className="cms-fields-grid">
-              <Field label="Waktu" value={content.holyMatrimony.time} onChange={(v) => updateNested('holyMatrimony', 'time', v)} />
-              <Field label="Nama Tempat" value={content.holyMatrimony.place} onChange={(v) => updateNested('holyMatrimony', 'place', v)} />
-              <TextArea label="Alamat Detail" value={content.holyMatrimony.place_details} onChange={(v) => updateNested('holyMatrimony', 'place_details', v)} rows={2} />
-              <Field label="Link Google Maps" value={content.holyMatrimony.googleMapsLink} onChange={(v) => updateNested('holyMatrimony', 'googleMapsLink', v)} />
+    if (activeTab === 'acara') {
+      // When sameAsAkad is toggled on, auto-sync place and googleMapsLink from holyMatrimony
+      const handleSameAsAkad = (checked) => {
+        setSameAsAkad(checked)
+        if (checked) {
+          updateNested('weddingReception', 'place', content.holyMatrimony.place || '')
+          updateNested('weddingReception', 'googleMapsLink', content.holyMatrimony.googleMapsLink || '')
+        }
+      }
+
+      const mapsLink = sameAsAkad
+        ? content.holyMatrimony.googleMapsLink
+        : content.weddingReception.googleMapsLink
+
+      return (
+        <div className="cms-repeat-list">
+          {/* Akad Nikah */}
+          <article className="cms-repeat-item">
+            <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <strong>Pemberkatan / Akad Nikah</strong>
+              <Toggle label="Aktifkan" checked={content.holyMatrimony.enabled} onChange={(v) => updateNested('holyMatrimony', 'enabled', v)} />
             </div>
-          )}
-        </article>
-        <article className="cms-repeat-item mt-4">
-          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <strong>Resepsi Pernikahan</strong>
-            <Toggle label="Aktifkan" checked={content.weddingReception.enabled} onChange={(v) => updateNested('weddingReception', 'enabled', v)} />
-          </div>
-          {content.weddingReception.enabled && (
-            <div className="cms-fields-grid">
-              <Field label="Waktu" value={content.weddingReception.time} onChange={(v) => updateNested('weddingReception', 'time', v)} />
-              <Field label="Nama Tempat" value={content.weddingReception.place} onChange={(v) => updateNested('weddingReception', 'place', v)} />
-              <TextArea label="Alamat Detail" value={content.weddingReception.place_details} onChange={(v) => updateNested('weddingReception', 'place_details', v)} rows={2} />
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-                <div style={{ flex: 1 }}>
-                  <Field label="Link Google Maps" value={content.weddingReception.googleMapsLink} onChange={(v) => updateNested('weddingReception', 'googleMapsLink', v)} />
-                </div>
-                {content.holyMatrimony.enabled && content.holyMatrimony.googleMapsLink && (
-                  <button
-                    type="button"
-                    onClick={() => updateNested('weddingReception', 'googleMapsLink', content.holyMatrimony.googleMapsLink)}
-                    style={{ padding: '8px 12px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', whiteSpace: 'nowrap', marginBottom: '4px' }}
-                    title="Salin link Maps dari Akad"
+            {content.holyMatrimony.enabled && (
+              <div className="cms-fields-grid">
+                <Field label="Waktu" value={content.holyMatrimony.time} onChange={(v) => updateNested('holyMatrimony', 'time', v)} />
+                <Field label="Nama Tempat" value={content.holyMatrimony.place} onChange={(v) => updateNested('holyMatrimony', 'place', v)} />
+                <TextArea label="Alamat Detail" value={content.holyMatrimony.place_details} onChange={(v) => updateNested('holyMatrimony', 'place_details', v)} rows={2} />
+                <Field label="Link Google Maps" value={content.holyMatrimony.googleMapsLink} onChange={(v) => updateNested('holyMatrimony', 'googleMapsLink', v)} />
+              </div>
+            )}
+          </article>
+
+          {/* Resepsi Pernikahan */}
+          <article className="cms-repeat-item mt-4">
+            <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <strong>Resepsi Pernikahan</strong>
+              <Toggle label="Aktifkan" checked={content.weddingReception.enabled} onChange={(v) => updateNested('weddingReception', 'enabled', v)} />
+            </div>
+            {content.weddingReception.enabled && (
+              <div className="cms-fields-grid">
+                <Field label="Waktu" value={content.weddingReception.time} onChange={(v) => updateNested('weddingReception', 'time', v)} />
+
+                {/* Checkbox Samakan dengan Akad */}
+                {content.holyMatrimony.enabled && (
+                  <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: sameAsAkad ? '#f0fdf4' : '#f9fafb', border: `1px solid ${sameAsAkad ? '#86efac' : '#e5e7eb'}`, borderRadius: '8px', cursor: 'pointer' }}
+                    onClick={() => handleSameAsAkad(!sameAsAkad)}
                   >
-                    📌 Samakan dengan Akad
-                  </button>
+                    <input
+                      type="checkbox"
+                      id="sameAsAkad"
+                      checked={sameAsAkad}
+                      onChange={(e) => handleSameAsAkad(e.target.checked)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#22c55e' }}
+                    />
+                    <label htmlFor="sameAsAkad" style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 500, color: sameAsAkad ? '#15803d' : '#374151', userSelect: 'none' }}>
+                      Lokasi sama dengan Akad Nikah
+                    </label>
+                    {sameAsAkad && <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#16a34a' }}>✓ Terhubung otomatis</span>}
+                  </div>
+                )}
+
+                {/* Nama Tempat - disabled kalau sameAsAkad */}
+                <div style={{ opacity: sameAsAkad ? 0.5 : 1 }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px', color: '#374151' }}>Nama Tempat</label>
+                  <input
+                    type="text"
+                    value={sameAsAkad ? content.holyMatrimony.place : content.weddingReception.place}
+                    onChange={(e) => !sameAsAkad && updateNested('weddingReception', 'place', e.target.value)}
+                    disabled={sameAsAkad}
+                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', background: sameAsAkad ? '#f3f4f6' : '#fff', color: '#111827', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <TextArea label="Alamat Detail" value={content.weddingReception.place_details} onChange={(v) => updateNested('weddingReception', 'place_details', v)} rows={2} />
+
+                {/* Link Maps - hanya tampil kalau BUKAN sameAsAkad */}
+                {!sameAsAkad && (
+                  <Field label="Link Google Maps" value={content.weddingReception.googleMapsLink} onChange={(v) => updateNested('weddingReception', 'googleMapsLink', v)} />
+                )}
+
+                {/* Satu tombol Maps di bawah */}
+                {mapsLink && (
+                  <div style={{ gridColumn: '1 / -1', marginTop: '4px' }}>
+                    <a
+                      href={mapsLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#1a73e8', color: '#fff', borderRadius: '6px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      🗺️ Buka Google Maps
+                      {sameAsAkad && <span style={{ opacity: 0.8, fontWeight: 400 }}>(lokasi akad)</span>}
+                    </a>
+                  </div>
                 )}
               </div>
-            </div>
-          )}
-        </article>
-      </div>
-    )
+            )}
+          </article>
+        </div>
+      )
+    }
 
     if (activeTab === 'countdown') return (
       <div className="cms-repeat-list">

@@ -1,24 +1,8 @@
-"use client";
+import { fetchConfig } from "@/lib/config";
+import ClientHomeWrapper from "./[slug]/ClientHomeWrapper";
 
-import { useEffect, useState } from "react";
-import ScreenStart from "./components/ScreenStart";
-import MainContent from "./components/MainContent";
+export default async function Home() {
+  const config = await fetchConfig();
 
-export default function Home() {
-  const [showContent, setShowContent] = useState(false);
-
-  useEffect(() => {
-    const contentTimer = setTimeout(() => {
-      setShowContent(true);
-    }, 7000);
-
-    return () => clearTimeout(contentTimer);
-  }, []);
-
-  return (
-    <div className="h-screen">
-      <ScreenStart />
-      {showContent && <MainContent />} {/* Tampilkan MainContent */}
-    </div>
-  );
+  return <ClientHomeWrapper slug="" guest={null} config={config} />;
 }

@@ -8,14 +8,17 @@ import { useInView } from "react-intersection-observer";
 import CountdownTimer from "./Countdown";
 import Form from "./Form";
 import WishesList from "./WishesList";
-import { config } from "@/lib/config";
+import GallerySection from "./GallerySection";
+import GiftsSection from "./GiftsSection";
+import type { WeddingConfig } from "@/lib/config";
 
 type WeddingScreenProps = {
   name?: string;
+  config: WeddingConfig;
   onOpenInvitation?: () => void;
 };
 
-const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
+const WeddingScreen = ({ name, config, onOpenInvitation }: WeddingScreenProps) => {
   const [fadeClass, setFadeClass] = useState("opacity-0");
   const [isOpen, setIsOpen] = useState(false);
   const audioRef = useRef(null);
@@ -28,6 +31,17 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  const [bgIndex, setBgIndex] = useState(0);
+
+  useEffect(() => {
+    if (config.gallery?.photos && config.gallery.photos.length > 1) {
+      const interval = setInterval(() => {
+        setBgIndex((prev) => (prev + 1) % config.gallery.photos!.length);
+      }, 5000); // Ganti gambar setiap 5 detik
+      return () => clearInterval(interval);
+    }
+  }, [config.gallery?.photos]);
 
   const handleOpen = () => {
     setIsOpen(!isOpen);
@@ -49,6 +63,10 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
   });
 
   const { ref: slide1Ref, inView: isSlide1InView } = useInView({
+    threshold: 0.5,
+  });
+
+  const { ref: slideBrideGroomRef, inView: isSlideBrideGroomInView } = useInView({
     threshold: 0.5,
   });
 
@@ -85,6 +103,8 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
     threshold: 0.5,
   });
 
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
   useEffect(() => {
     const video = document.querySelector("iframe");
     if (video) {
@@ -104,7 +124,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
       <div
         className="md:flex justify-center hidden items-end pb-12 w-2/3 h-1/2 md:h-full"
         style={{
-          backgroundImage: `url(/foto_1_samping.jpg)`, //refer to base 1st photo
+          backgroundImage: `url(${config.backgrounds?.bg_sidebar || "/foto_1_samping.jpg"})`, //refer to base 1st photo
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -117,12 +137,41 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
       </div>
 
       {/* Konten teks sisi kanan bisa scroll untuk pc */}
-      <div className=" md:w-1/3 h-full overflow-y-scroll snap-y snap-mandatory scroll-smooth">
+      <div className=" md:w-1/3 h-full overflow-y-scroll snap-y snap-mandatory scroll-smooth relative">
         <div
           id="backgroundWedding"
-          className=" snap-start  w-full h-screen flex items-center justify-center "
+          className=" snap-start relative w-full h-screen flex items-center justify-center "
         >
-          <div className="text-center p-5 flex flex-col h-full justify-between py-20">
+          {/* Background Layer with Crossfade */}
+          <div className="absolute inset-0 w-full h-full z-0 bg-black overflow-hidden">
+            {(config.gallery?.photos && config.gallery.photos.length > 0) ? (
+              config.gallery.photos.map((photo, index) => (
+                <div
+                  key={index}
+                  className="absolute inset-0 w-full h-full transition-opacity ease-in-out"
+                  style={{
+                    transitionDuration: '2s',
+                    backgroundImage: `url(${photo.src})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    opacity: bgIndex === index ? 0.6 : 0,
+                  }}
+                />
+              ))
+            ) : (
+              <div
+                className="absolute inset-0 w-full h-full"
+                style={{
+                  backgroundImage: `url(${config.backgrounds?.bg_welcome || "/foto_2.jpg"})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  opacity: 0.6,
+                }}
+              />
+            )}
+          </div>
+
+          <div className="text-center p-5 flex flex-col h-full justify-between py-20 relative z-10">
             <div className="gap-y-2 md:gap-y-4 flex flex-col">
               <h5
                 className={`text-sm font-legan text-white uppercase tracking-wide fadeMain2 ${isMain2InView ? "active" : ""
@@ -177,7 +226,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
             <div
               className={`text-white h-screen flex pt-12 p-5 px-12 snap-start `}
               style={{
-                backgroundImage: `url(/slide_1.jpg)`,
+                backgroundImage: `url(${config.backgrounds?.slide_1 || "/slide_1.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -195,11 +244,35 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
                 <p className="text-6xl mt-5 font-wonder">{config.coupleNames}</p>
               </div>
             </div>
+            {/* Slide Bride & Groom (Slide 1.5) */}
+            <div
+              className={`text-white h-screen flex flex-col justify-center items-center p-5 px-12 snap-start `}
+              style={{
+                backgroundImage: `url(${config.backgrounds?.bg_bride_groom || "/foto_1_samping.jpg"})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div
+                ref={slideBrideGroomRef}
+                className={` ${isSlideBrideGroomInView ? "active" : ""} fadeInMove text-center flex flex-col items-center justify-center`}
+              >
+                <h1 className="text-2xl font-ovo text-white uppercase mb-4">
+                  {config.brideGroomTitle}
+                </h1>
+                <p className="text-sm font-legan text-white mb-2">
+                  {config.brideGroomGreeting}
+                </p>
+                <p className="text-xs font-legan text-[#CCCCCC]">
+                  {config.brideGroomText}
+                </p>
+              </div>
+            </div>
             {/* Slide 2 */}
             <div
               className={`text-white h-screen flex items-end pb-16 px-12 snap-start `}
               style={{
-                backgroundImage: `url(/slide_2.jpg)`,
+                backgroundImage: `url(${config.backgrounds?.slide_2 || "/slide_2.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -230,7 +303,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
             <div
               className="snap-start  text-white h-screen flex items-end pb-16 px-12 "
               style={{
-                backgroundImage: `url(/slide_3.jpg)`,
+                backgroundImage: `url(${config.backgrounds?.slide_3 || "/slide_3.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -260,7 +333,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
             <div
               className="snap-start  text-white h-screen pt-8 flex px-12 "
               style={{
-                backgroundImage: `url(/slide_4.jpg)`,
+                backgroundImage: `url(${config.backgrounds?.slide_4 || "/slide_4.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -315,6 +388,20 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
                 >
                   {config.timeline_3_content}
                 </p>
+                <h3
+                  ref={slide4Ref}
+                  className={`uppercase font-legan text-xl mt-5 mb-2 fadeInMoveSlow ${isSlide4InView ? " active" : ""
+                    }`}
+                >
+                  {config.timeline_4}
+                </h3>
+                <p
+                  ref={slide4Ref}
+                  className={`text-xs font-legan text-white fadeInLeftSlow ${isSlide4InView ? " active" : ""
+                    }`}
+                >
+                  {config.timeline_4_content}
+                </p>
                 <div
                   ref={slide4Ref}
                   className={`relative flex items-center mt-5 fadeInLeft ${isSlide4InView ? " active" : ""
@@ -331,7 +418,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
             <div
               className="snap-start  text-white h-screen flex flex-col items-center px-12 "
               style={{
-                backgroundImage: `url(/slide_5.jpg)`,
+                backgroundImage: `url(${config.backgrounds?.slide_5 || "/slide_5.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -356,7 +443,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
                 {config.holyMatrimony.enabled && (
                   <div className="mt-5 mx-auto flex flex-col items-center">
                     <h3 className="uppercase font-ovo text-sm text-center mt-5 mb-2">
-                      Holy Matrimony <br /> {config.holyMatrimony.time}
+                      AKAD NIKAH <br /> {config.holyMatrimony.time}
                     </h3>
                     <p className="text-sm text-center  font-legan text-white">
                       {config.holyMatrimony.place} <br /> {config.holyMatrimony.place_details}
@@ -394,7 +481,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
             <div
               className="snap-start  text-white h-screen flex flex-col items-center justify-end pb-16 px-12 "
               style={{
-                backgroundImage: `url(/slide_6.jpg)`,
+                backgroundImage: `url(${config.backgrounds?.slide_6 || "/slide_6.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -408,15 +495,21 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
                   ALMOST TIME FOR OURCELEBRATION
                 </h1>
                 {/* Countdown Timer */}
-                <CountdownTimer />
+                <CountdownTimer eventDate={config.eventDate} />
               </div>
             </div>
+            
+            {/* Gallery Section */}
+            <GallerySection config={config} />
+
+            {/* Gifts Section */}
+            <GiftsSection config={config} />
             {/* Slide 7 */}
             {config.livestreaming.enabled && (
               <div
                 className="snap-start  text-white h-screen flex flex-col justify-between pt-16 pb-32 px-12 "
                 style={{
-                  backgroundImage: `url(/foto_1_samping.jpg)`,
+                  backgroundImage: `url(${config.backgrounds?.slide_7 || "/foto_1_samping.jpg"})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}
@@ -460,7 +553,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
               <div
                 className="snap-start text-white h-screen flex flex-col justify-center pt-16 pb-16 px-8 "
                 style={{
-                  backgroundImage: `url(/slide_8.jpg)`,
+                  backgroundImage: `url(${config.backgrounds?.slide_8 || "/slide_8.jpg"})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}
@@ -499,7 +592,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
             <div
               className="snap-start text-white h-screen flex flex-col justify-center pt-16 pb-16 px-8"
               style={{
-                backgroundImage: `url(/slide_9.jpg)`,
+                backgroundImage: `url(${config.backgrounds?.slide_9 || "/slide_9.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -515,7 +608,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
                 {config.rsvp.detail}
                 </p>
 
-                <Form />
+                <Form onSuccess={() => setRefreshTrigger(prev => prev + 1)} initialName={name} />
               </div>
             </div>
             )}
@@ -524,7 +617,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
             <div
               className="snap-start text-white h-screen flex flex-col justify-center pt-16 pb-16 px-8"
               style={{
-                backgroundImage: `url(/slide_9.jpg)`,
+                backgroundImage: `url(${config.backgrounds?.slide_10 || "/slide_9.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -536,7 +629,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
                 <h1 className="text-3xl text-white font-ovo text-center uppercase">
                   Wishes
                 </h1>
-                <WishesList />
+                <WishesList refreshTrigger={refreshTrigger} />
               </div>
             </div>
 
@@ -544,7 +637,7 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
             <div
               className="snap-start text-white h-screen flex flex-col justify-end pt-16 pb-16 px-12 "
               style={{
-                backgroundImage: `url(/slide_7.jpg)`,
+                backgroundImage: `url(${config.backgrounds?.slide_1 || "/slide_7.jpg"})`, // or maybe a specific one for thank you
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -568,10 +661,9 @@ const WeddingScreen = ({ name, onOpenInvitation }: WeddingScreenProps) => {
               </div>
 
               <footer className="flex flex-col items-center mt-8">
-                <p className="text-[0.5rem] uppercase text-center">
-                  Created By Peter Shaan
+                <p className="text-[0.5rem] uppercase text-center font-legan tracking-widest">
+                  #roMAnSAsatuhati
                 </p>
-                <p className="text-xs">© All rights reserved by petershaan</p>
               </footer>
             </div>
           </>

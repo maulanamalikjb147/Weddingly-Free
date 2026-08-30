@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { IoMdRefresh } from "react-icons/io";
-
 interface Wish {
   _id: string;
   name: string;
@@ -10,14 +8,17 @@ interface Wish {
   createdAt: string;
 }
 
-const WishesList = () => {
+interface WishesListProps {
+  refreshTrigger?: number;
+}
+
+const WishesList = ({ refreshTrigger = 0 }: WishesListProps) => {
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false); // Add loading state
+
 
   const fetchWishes = async (pageNumber: number) => {
-    setLoading(true); // Set loading to true when fetching
     try {
       const response = await fetch(`/api/get?page=${pageNumber}&limit=5`);
       if (!response.ok) {
@@ -29,14 +30,12 @@ const WishesList = () => {
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error("Error fetching wishes:", error);
-    } finally {
-      setLoading(false); // Set loading to false after fetching
     }
   };
 
   useEffect(() => {
     fetchWishes(page);
-  }, [page]);
+  }, [page, refreshTrigger]);
 
   const handleNextPage = () => {
     if (page < totalPages) setPage(page + 1);
@@ -46,24 +45,10 @@ const WishesList = () => {
     if (page > 1) setPage(page - 1);
   };
 
-  const handleRefresh = () => {
-    fetchWishes(page); // Re-fetch the current page
-  };
+
 
   return (
     <div className="bg-black/50 text-white p-4 rounded-md mt-5">
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={handleRefresh}
-          className={`text-sm text-white ${
-            loading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          disabled={loading} // Disable while loading
-        >
-          {loading ? "Refreshing..." : <IoMdRefresh className="w-6 h-6" />}
-        </button>
-      </div>
-
       <div className="max-h-[500px] overflow-y-auto">
         {wishes.length === 0 ? (
           <p>No wishes available</p>

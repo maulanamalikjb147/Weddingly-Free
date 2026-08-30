@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Ovo } from "@next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { config } from "@/lib/config";
 
 const legan = localFont({
   src: "./fonts/Legan.woff",
@@ -29,10 +28,15 @@ const ovo = Ovo({
 });
 
 
-export const metadata: Metadata = {
-  title: `The Wedding of ${config.coupleNames}`,
-  description: `Wedding Invitation of ${config.coupleNames}, made by Peter Shaan`,
-};
+import { fetchConfig } from "@/lib/config";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await fetchConfig();
+  return {
+    title: `The Wedding of ${config.coupleNames}`,
+    description: `Wedding Invitation of ${config.coupleNames}, made by Peter Shaan`,
+  };
+}
 
 export default function RootLayout({
   children,

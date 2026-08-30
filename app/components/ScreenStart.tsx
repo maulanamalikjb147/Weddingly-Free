@@ -1,10 +1,10 @@
 "use client";
 
-import { config } from "@/lib/config";
 import { useEffect, useState } from "react";
 import { TypeAnimation } from "react-type-animation";
+import type { WeddingConfig } from "@/lib/config";
 
-const ScreenStart = () => {
+const ScreenStart = ({ config }: { config: WeddingConfig }) => {
   const [showScreenStart, setShowScreenStart] = useState(true);
   const [fadeClass, setFadeClass] = useState("opacity-100");
 

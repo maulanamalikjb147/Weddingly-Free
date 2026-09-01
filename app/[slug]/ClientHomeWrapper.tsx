@@ -54,7 +54,11 @@ export default function ClientHomeWrapper({ slug, guest: initialGuest, config }:
   }, [slug, initialGuest]);
 
   const handleOpenInvitation = () => {
-    setQrOpen(true);
+    if (process.env.NEXT_PUBLIC_QR_CODE === 'false') {
+      setIsProceeded(true);
+    } else {
+      setQrOpen(true);
+    }
   };
 
   return (

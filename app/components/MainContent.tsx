@@ -121,7 +121,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
       <div
         className="md:flex justify-center hidden items-end pb-12 w-2/3 h-1/2 md:h-full"
         style={{
-          backgroundImage: `url(${config.backgrounds?.bg_sidebar || "/foto_1_samping.jpg"})`, //refer to base 1st photo
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.bg_sidebar || "/foto_1_samping.jpg"})`, //refer to base 1st photo
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -148,7 +148,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                   className="absolute inset-0 w-full h-full transition-opacity ease-in-out"
                   style={{
                     transitionDuration: '2s',
-                    backgroundImage: `url(${photo.src})`,
+                    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${photo.src})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     opacity: bgIndex === index ? 0.6 : 0,
@@ -159,7 +159,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               <div
                 className="absolute inset-0 w-full h-full"
                 style={{
-                  backgroundImage: `url(${config.backgrounds?.bg_welcome || "/foto_2.jpg"})`,
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.bg_welcome || "/foto_2.jpg"})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                   opacity: 0.6,
@@ -225,7 +225,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <div
               className={`text-white h-screen flex pt-12 p-5 px-12 snap-start `}
               style={{
-                backgroundImage: `url(${config.backgrounds?.slide_1 || "/slide_1.jpg"})`,
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_1 || "/slide_1.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -251,7 +251,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <div
               className="snap-start  text-white h-screen pt-8 flex px-12 "
               style={{
-                backgroundImage: `url(${config.backgrounds?.slide_4 || "/slide_4.jpg"})`,
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_4 || "/slide_4.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -340,7 +340,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <div
               className={`text-white h-screen flex flex-col justify-center items-center p-5 px-12 snap-start `}
               style={{
-                backgroundImage: `url(${config.backgrounds?.bg_bride_groom || "/foto_1_samping.jpg"})`,
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.bg_bride_groom || "/foto_1_samping.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -365,7 +365,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <div
               className={`text-white h-screen flex items-end pb-16 px-12 snap-start `}
               style={{
-                backgroundImage: `url(${config.backgrounds?.slide_2 || "/slide_2.jpg"})`,
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_2 || "/slide_2.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -400,7 +400,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <div
               className="snap-start  text-white h-screen flex items-end pb-16 px-12 "
               style={{
-                backgroundImage: `url(${config.backgrounds?.slide_3 || "/slide_3.jpg"})`,
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_3 || "/slide_3.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -434,7 +434,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <div
               className="snap-start  text-white h-screen flex flex-col items-center px-12 "
               style={{
-                backgroundImage: `url(${config.backgrounds?.slide_5 || "/slide_5.jpg"})`,
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_5 || "/slide_5.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -520,7 +520,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <div
               className="snap-start  text-white h-screen flex flex-col items-center justify-end pb-16 px-12 "
               style={{
-                backgroundImage: `url(${config.backgrounds?.slide_6 || "/slide_6.jpg"})`,
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_6 || "/slide_6.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -566,7 +566,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <div
               className="snap-start text-white h-screen flex flex-col justify-center pt-16 pb-16 px-8"
               style={{
-                backgroundImage: `url(${config.backgrounds?.slide_9 || "/slide_9.jpg"})`,
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_9 || "/slide_9.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -591,7 +591,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <div
               className="snap-start text-white h-screen flex flex-col justify-center pt-16 pb-16 px-8"
               style={{
-                backgroundImage: `url(${config.backgrounds?.slide_10 || "/slide_9.jpg"})`,
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_10 || "/slide_9.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -614,7 +614,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             <div
               className="snap-start text-white h-screen flex flex-col justify-end pt-16 pb-16 px-12 "
               style={{
-                backgroundImage: `url(${config.backgrounds?.slide_1 || "/slide_7.jpg"})`, // or maybe a specific one for thank you
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_1 || "/slide_7.jpg"})`, // or maybe a specific one for thank you
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -655,7 +655,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               <div
                 className="snap-start  text-white h-screen flex flex-col justify-between pt-16 pb-32 px-12 "
                 style={{
-                  backgroundImage: `url(${config.backgrounds?.slide_7 || "/foto_1_samping.jpg"})`,
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_7 || "/foto_1_samping.jpg"})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}
@@ -700,7 +700,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               <div
                 className="snap-start text-white h-screen flex flex-col justify-center pt-16 pb-16 px-8 "
                 style={{
-                  backgroundImage: `url(${config.backgrounds?.slide_8 || "/slide_8.jpg"})`,
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_8 || "/slide_8.jpg"})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}

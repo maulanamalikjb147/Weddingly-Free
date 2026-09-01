@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { SUPABASE_TABLES } from "@/lib/supabaseTables";
 
 export const defaultConfig = {
     sectionOrder: ['ayat', 'timeline', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'galeri', 'rekening', 'rsvp', 'thankyou'],
@@ -88,7 +89,7 @@ export type WeddingConfig = typeof defaultConfig;
 export async function fetchConfig(): Promise<WeddingConfig> {
   try {
     const { data, error } = await supabase
-      .from('wedding_cms_settings')
+      .from(SUPABASE_TABLES.weddingCmsSettings)
       .select('content')
       .eq('id', 'default')
       .maybeSingle();

@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { SUPABASE_TABLES } from "@/lib/supabaseTables";
 
 export async function POST(req: Request) {
   try {
     const { name, attendance, guests, message } = await req.json();
     
-    const { error } = await supabase.from("rsvps").insert({
+    const { error } = await supabase.from(SUPABASE_TABLES.rsvps).insert({
       name,
       attendance: attendance === "Hadir" ? "hadir" : "tidak",
       guests: Number(guests) || 1,

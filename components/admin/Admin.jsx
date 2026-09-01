@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import NextLink from 'next/link'
 import { supabase } from './supabaseClient'
+import { SUPABASE_TABLES } from '@/lib/supabaseTables'
 import QRCode from 'qrcode'
 import Icon from './Icon'
 
@@ -103,7 +104,7 @@ function Admin() {
     if (showLoading) setLoading(true)
     try {
       const { data, error } = await supabase
-        .from('data_tamu')
+        .from(SUPABASE_TABLES.dataTamu)
         .select('*')
         .order('created_at', { ascending: false })
 
@@ -120,7 +121,7 @@ function Admin() {
   const fetchConfigTamuDari = async () => {
     try {
       const { data, error } = await supabase
-        .from('config_tamu_dari')
+        .from(SUPABASE_TABLES.configTamuDari)
         .select('name, bulk_delay_seconds, bulk_randomize_delay')
         .order('name', { ascending: true })
 
@@ -135,7 +136,7 @@ function Admin() {
   const fetchInvitationTemplates = async () => {
     try {
       const { data, error } = await supabase
-        .from('invitation_message_templates')
+        .from(SUPABASE_TABLES.invitationMessageTemplates)
         .select('tamu_from, message_template, is_active')
         .eq('is_active', true)
 
@@ -190,7 +191,7 @@ function Admin() {
       .channel('admin-guest-delivery-status')
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'data_tamu' },
+        { event: 'UPDATE', schema: 'public', table: SUPABASE_TABLES.dataTamu },
         () => { void fetchGuests(false) }
       )
       .subscribe()
@@ -209,7 +210,7 @@ function Admin() {
       syncing = true
       try {
         const { data: activeBatches, error: activeBatchError } = await supabase
-          .from('invitation_bulk_batches')
+          .from(SUPABASE_TABLES.invitationBulkBatches)
           .select('id')
           .in('status', ['creating', 'pending', 'processing'])
 
@@ -270,7 +271,7 @@ function Admin() {
       const { data: qrUrlData } = supabase.storage.from(QR_BUCKET).getPublicUrl(fileName)
 
       const { error: updateError } = await supabase
-        .from('data_tamu')
+        .from(SUPABASE_TABLES.dataTamu)
         .update({ is_generated: true, qr_code_url: qrUrlData.publicUrl })
         .eq('id', guest.id)
 
@@ -320,7 +321,7 @@ function Admin() {
     setLoading(true)
     try {
       const { error } = await supabase
-        .from('data_tamu')
+        .from(SUPABASE_TABLES.dataTamu)
         .insert([{
           nama_tamu: newGuest.nama_tamu,
           alamat_tamu: newGuest.alamat_tamu,
@@ -362,7 +363,7 @@ function Admin() {
 
     try {
       const { error: updateError } = await supabase
-        .from('data_tamu')
+        .from(SUPABASE_TABLES.dataTamu)
         .update(payload)
         .eq('id', guest.id)
 
@@ -424,7 +425,7 @@ function Admin() {
 
     try {
       const { error: updateError } = await supabase
-        .from('data_tamu')
+        .from(SUPABASE_TABLES.dataTamu)
         .update(payload)
         .eq('id', guest.id)
 
@@ -644,7 +645,7 @@ function Admin() {
 
       // Insert guests into database
       const { error: insertError } = await supabase
-        .from('data_tamu')
+        .from(SUPABASE_TABLES.dataTamu)
         .insert(bulkGuests)
 
       if (insertError) throw insertError
@@ -669,7 +670,7 @@ function Admin() {
 
     try {
       const { error } = await supabase
-        .from('data_tamu')
+        .from(SUPABASE_TABLES.dataTamu)
         .delete()
         .eq('id', id)
 

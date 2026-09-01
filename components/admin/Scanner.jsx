@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from './supabaseClient'
+import { SUPABASE_TABLES } from '@/lib/supabaseTables'
 import Icon from './Icon'
 
 function Scanner() {
@@ -71,7 +72,7 @@ function Scanner() {
       const { id, nama_tamu, alamat_tamu } = guestData
 
       const { error: updateError } = await supabase
-        .from('data_tamu')
+        .from(SUPABASE_TABLES.dataTamu)
         .update({ 
           hadir: true, 
           checkin: new Date().toISOString(),

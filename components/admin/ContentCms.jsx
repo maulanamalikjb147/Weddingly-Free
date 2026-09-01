@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Check, RefreshCw, Save, X, ImagePlus, Trash2, Upload, GripVertical } from 'lucide-react'
 import { supabase } from './supabaseClient'
 import { defaultConfig } from '@/lib/config'
+import { SUPABASE_TABLES } from '@/lib/supabaseTables'
 
 function Field({ label, value, onChange, type = 'text', placeholder }) {
   return (
@@ -83,7 +84,7 @@ export default function ContentCms() {
     setLoading(true)
     setMessage(null)
     try {
-      const { data, error } = await supabase.from('wedding_cms_settings').select('content').eq('id', 'default').maybeSingle()
+      const { data, error } = await supabase.from(SUPABASE_TABLES.weddingCmsSettings).select('content').eq('id', 'default').maybeSingle()
       if (error) throw error
       if (data && data.content) {
         setContent({ 
@@ -108,12 +109,12 @@ export default function ContentCms() {
 
   const loadAssets = async () => {
     try {
-      const { data, error } = await supabase.storage.from('wedding-assets').list('cms/imported/images-v2', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
+      const { data, error } = await supabase.storage.from('wedding-assets').list('cms/imported/images-siraman', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
       if (error) throw error
       
       const files = data.filter((file) => file.name !== '.emptyFolderPlaceholder')
       const assets = files.map((file) => {
-        const { data: { publicUrl } } = supabase.storage.from('wedding-assets').getPublicUrl(`cms/imported/images-v2/${file.name}`)
+        const { data: { publicUrl } } = supabase.storage.from('wedding-assets').getPublicUrl(`cms/imported/images-siraman/${file.name}`)
         return {
           id: file.id,
           file_name: file.name,
@@ -164,7 +165,7 @@ export default function ContentCms() {
     setMessage(null)
     try {
       const { data: userData } = await supabase.auth.getUser()
-      const { error } = await supabase.from('wedding_cms_settings').upsert({ 
+      const { error } = await supabase.from(SUPABASE_TABLES.weddingCmsSettings).upsert({ 
         id: 'default', 
         content: content, 
         updated_at: new Date().toISOString(), 
@@ -188,7 +189,7 @@ export default function ContentCms() {
         const fileExt = file.name.split('.').pop()
         const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`
         
-        const { error: uploadError } = await supabase.storage.from('wedding-assets').upload(`cms/imported/images-v2/${fileName}`, file, { upsert: false })
+        const { error: uploadError } = await supabase.storage.from('wedding-assets').upload(`cms/imported/images-siraman/${fileName}`, file, { upsert: false })
         if (uploadError) throw uploadError
       }
       await loadAssets()
@@ -203,7 +204,7 @@ export default function ContentCms() {
   const deleteAsset = async (asset) => {
     if (!confirm('Yakin ingin menghapus foto ini?')) return
     try {
-      const { error } = await supabase.storage.from('wedding-assets').remove([`cms/imported/images-v2/${asset.file_name}`])
+      const { error } = await supabase.storage.from('wedding-assets').remove([`cms/imported/images-siraman/${asset.file_name}`])
       if (error) throw error
       await loadAssets()
     } catch (error) {

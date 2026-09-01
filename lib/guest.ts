@@ -1,12 +1,12 @@
+import { supabase } from "@/lib/supabase";
+import { SUPABASE_TABLES } from "@/lib/supabaseTables";
+
 export type WeddingGuest = {
   id: string;
   name: string;
   address: string;
   slug: string;
 };
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export async function getWeddingGuest(slug: string): Promise<WeddingGuest | null> {
   if (slug === "preview" && process.env.NODE_ENV !== "production") {
@@ -18,23 +18,13 @@ export async function getWeddingGuest(slug: string): Promise<WeddingGuest | null
     };
   }
 
-  if (!supabaseUrl || !supabaseKey) return null;
+  const { data: guest, error } = await supabase
+    .from(SUPABASE_TABLES.dataTamu)
+    .select("id,nama_tamu,alamat_tamu,invitation_slug")
+    .eq("invitation_slug", slug)
+    .maybeSingle();
 
-  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/get_wedding_guest`, {
-    method: "POST",
-    headers: {
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ p_slug: slug }),
-    cache: "no-store",
-  });
-
-  if (!response.ok) return null;
-  const rows = await response.json() as Array<Record<string, unknown>>;
-  const guest = rows[0];
-  if (!guest) return null;
+  if (error || !guest) return null;
 
   return {
     id: String(guest.id),

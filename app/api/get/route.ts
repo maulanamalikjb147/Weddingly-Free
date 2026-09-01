@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { SUPABASE_TABLES } from "@/lib/supabaseTables";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -12,7 +13,7 @@ export async function GET(req: Request) {
 
     // Fetch paginated wishes
     const { data: wishes, error, count } = await supabase
-      .from("rsvps")
+      .from(SUPABASE_TABLES.rsvps)
       .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(from, to);

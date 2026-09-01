@@ -347,12 +347,12 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
             >
               <div
                 ref={slideBrideGroomRef}
-                className={` ${isSlideBrideGroomInView ? "active" : ""} fadeInMove text-center flex flex-col items-center justify-center`}
+                className={` ${isSlideBrideGroomInView ? "active" : ""} fadeInMove text-center flex flex-col items-center justify-center bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl p-8 md:p-10 shadow-2xl max-w-3xl mx-auto w-full`}
               >
                 <p className="text-lg md:text-xl font-legan text-white mb-4 text-shadow-readable">
                   {config.brideGroomGreeting}
                 </p>
-                <p className="text-base md:text-lg font-legan text-white text-shadow-readable">
+                <p className="text-base md:text-lg font-legan text-white text-shadow-readable leading-relaxed">
                   {config.brideGroomText}
                 </p>
               </div>

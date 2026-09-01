@@ -25,6 +25,14 @@ const invitationBaseUrl = (process.env.NEXT_PUBLIC_INVITATION_BASE_URL || 'https
 const terminalStatuses = ['completed', 'failed', 'cancelled']
 
 const messageFromError = (error: unknown) => error instanceof Error ? error.message : String(error || 'Unknown error')
+const assertDb = async <T extends { error: { message: string } | null }>(
+  operation: PromiseLike<T>,
+  context: string,
+) => {
+  const result = await operation
+  if (result.error) throw new Error(`${context}: ${result.error.message}`)
+  return result
+}
 
 const normalizePhone = (value: unknown) => {
   let phone = String(value || '').replace(/\D/g, '')
@@ -86,12 +94,12 @@ async function finishCancelledItems(db: WhatsAppDbClient, batchId: string) {
 
   const guestIds = pendingItems.map((item) => item.guest_id).filter(Boolean)
   if (guestIds.length > 0) {
-    await db.from(SUPABASE_TABLES.dataTamu).update({
+    await assertDb(db.from(SUPABASE_TABLES.dataTamu).update({
       invitation_status: 'not_sent',
       invitation_error: null,
       invitation_bulk_batch_id: null,
       invitation_delivery_method: null,
-    }).in('id', guestIds)
+    }).in('id', guestIds), 'Gagal mengembalikan status tamu yang dibatalkan')
   }
 
   return pendingItems.length
@@ -190,14 +198,14 @@ async function runBulkJob(db: WhatsAppDbClient, batchId: string) {
           processed_at: processedAt,
           updated_at: processedAt,
         }).eq('id', item.id)
-        await db.from(SUPABASE_TABLES.dataTamu).update({
+        await assertDb(db.from(SUPABASE_TABLES.dataTamu).update({
           invitation_status: 'sent',
           invitation_sent_at: processedAt,
           invitation_message_id: result?.key?.id || null,
           invitation_error: null,
           invitation_bulk_batch_id: batchId,
           invitation_delivery_method: 'baileys_bulk',
-        }).eq('id', item.guest_id)
+        }).eq('id', item.guest_id), `Pesan terkirim, tapi status tamu ${item.guest_name} gagal diupdate`)
         await addLog(db, batchId, 'success', 'message_sent', `Berhasil terkirim ke ${item.guest_name}`, item.guest_id, {
           messageId: result?.key?.id || null,
         })
@@ -213,12 +221,12 @@ async function runBulkJob(db: WhatsAppDbClient, batchId: string) {
           processed_at: processedAt,
           updated_at: processedAt,
         }).eq('id', item.id)
-        await db.from(SUPABASE_TABLES.dataTamu).update({
+        await assertDb(db.from(SUPABASE_TABLES.dataTamu).update({
           invitation_status: 'failed',
           invitation_error: failure,
           invitation_bulk_batch_id: batchId,
           invitation_delivery_method: 'baileys_bulk',
-        }).eq('id', item.guest_id)
+        }).eq('id', item.guest_id), `Gagal menyimpan status gagal untuk ${item.guest_name}`)
         await addLog(db, batchId, 'error', 'message_failed', `Gagal mengirim ke ${item.guest_name}: ${failure}`, item.guest_id)
       }
 
@@ -371,12 +379,12 @@ export async function startWhatsAppBulkJob(db: WhatsAppDbClient, userId: string,
   }
 
   await Promise.all([
-    db.from(SUPABASE_TABLES.dataTamu).update({
+    assertDb(db.from(SUPABASE_TABLES.dataTamu).update({
       invitation_status: 'sending',
       invitation_error: null,
       invitation_bulk_batch_id: batch.id,
       invitation_delivery_method: 'baileys_bulk',
-    }).in('id', validGuests.map((guest) => guest.id)),
+    }).in('id', validGuests.map((guest) => guest.id)), 'Gagal menandai tamu sebagai sedang dikirim'),
     db.from(SUPABASE_TABLES.configTamuDari).update({
       bulk_delay_seconds: delaySeconds,
       bulk_randomize_delay: randomizeDelay,
@@ -414,34 +422,34 @@ export async function sendSingleWhatsAppInvitation(db: WhatsAppDbClient, guestId
 
   const phone = normalizePhone(guest.contact_number)
   const text = renderTemplate(template.message_template, guest, guest.tamu_from)
-  await db.from(SUPABASE_TABLES.dataTamu).update({
+  await assertDb(db.from(SUPABASE_TABLES.dataTamu).update({
     invitation_status: 'sending',
     invitation_error: null,
     invitation_bulk_batch_id: null,
     invitation_delivery_method: 'baileys',
-  }).eq('id', guest.id)
+  }).eq('id', guest.id), 'Gagal menandai tamu sebagai sedang dikirim')
 
   try {
     const { socket } = await connectedWhatsAppSocket(db, guest.tamu_from)
     const result = await socket.sendMessage(`${phone}@s.whatsapp.net`, { text })
     const sentAt = new Date().toISOString()
-    await db.from(SUPABASE_TABLES.dataTamu).update({
+    await assertDb(db.from(SUPABASE_TABLES.dataTamu).update({
       invitation_status: 'sent',
       invitation_sent_at: sentAt,
       invitation_message_id: result?.key?.id || null,
       invitation_error: null,
       invitation_bulk_batch_id: null,
       invitation_delivery_method: 'baileys',
-    }).eq('id', guest.id)
+    }).eq('id', guest.id), 'Pesan terkirim, tapi status tamu gagal diupdate')
     return { senderName: guest.tamu_from, messageId: result?.key?.id || null }
   } catch (error) {
     const failure = messageFromError(error)
-    await db.from(SUPABASE_TABLES.dataTamu).update({
+    await assertDb(db.from(SUPABASE_TABLES.dataTamu).update({
       invitation_status: 'failed',
       invitation_error: failure,
       invitation_bulk_batch_id: null,
       invitation_delivery_method: 'baileys',
-    }).eq('id', guest.id)
+    }).eq('id', guest.id), 'Gagal menyimpan status gagal tamu')
     throw error
   }
 }

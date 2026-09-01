@@ -40,6 +40,8 @@ const runtimes = runtimeGlobal.__siramanWhatsAppSessions || new Map<string, Sess
 runtimeGlobal.__siramanWhatsAppSessions = runtimes
 
 const logger = pino({ level: process.env.WHATSAPP_LOG_LEVEL || 'silent' })
+const shouldAutoRestoreSessions = process.env.WHATSAPP_AUTO_RESTORE === 'true'
+  || (process.env.WHATSAPP_AUTO_RESTORE !== 'false' && !process.env.NETLIFY && !process.env.VERCEL)
 
 const sessionIdFor = (value: string) => value
   .trim()
@@ -222,10 +224,15 @@ export async function connectWhatsAppSession(db: WhatsAppDbClient, requestedSour
           return
         }
 
+        if (statusCode === DisconnectReason.connectionReplaced) {
+          runtime.status = 'error'
+          runtime.lastError = 'Session digunakan oleh koneksi lain. Tutup runtime lain, lalu hubungkan ulang dari halaman ini.'
+          await saveSession(runtime)
+          return
+        }
+
         runtime.status = 'reconnecting'
-        runtime.lastError = statusCode === DisconnectReason.connectionReplaced
-          ? 'Session digunakan oleh koneksi lain'
-          : errorMessage(update.lastDisconnect?.error || 'Koneksi WhatsApp terputus')
+        runtime.lastError = errorMessage(update.lastDisconnect?.error || 'Koneksi WhatsApp terputus')
         await saveSession(runtime)
         scheduleReconnect(runtime)
       }
@@ -327,7 +334,7 @@ export async function listWhatsAppSessions(db: WhatsAppDbClient) {
       && ['not_sent', 'failed'].includes(guest.invitation_status)
     )).length
 
-    if (!runtime && source.whatsapp_enabled && savedSessions.has(sessionId)) {
+    if (shouldAutoRestoreSessions && !runtime && source.whatsapp_enabled && savedSessions.has(sessionId)) {
       void connectWhatsAppSession(db, source.name).catch(() => undefined)
     }
 

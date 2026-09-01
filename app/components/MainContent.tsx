@@ -171,21 +171,21 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
           <div className="text-center p-5 flex flex-col h-full justify-between py-20 relative z-10">
             <div className="gap-y-2 md:gap-y-4 flex flex-col">
               <h5
-                className={`text-sm font-legan text-white uppercase tracking-wide fadeMain2 ${isMain2InView ? "active" : ""
+                className={`text-base md:text-lg font-legan text-white uppercase tracking-wide text-shadow-readable fadeMain2 ${isMain2InView ? "active" : ""
                   } `}
                 ref={main2Ref}
               >
                 The Wedding Of
               </h5>
               <h1
-                className={`text-2xl md:text-3xl font-ovo t text-white uppercase fadeMain ${isMainInView ? "active" : ""
+                className={`text-3xl md:text-5xl font-ovo text-white uppercase text-shadow-readable fadeMain ${isMainInView ? "active" : ""
                   } `}
                 ref={mainRef}
               >
                 {config.coupleNames}
               </h1>
               <h5
-                className={`text-sm  font-legan text-white uppercase tracking-wide  fadeMain2 ${isMain2InView ? "active" : ""
+                className={`text-base md:text-lg font-legan text-white uppercase tracking-wide text-shadow-readable fadeMain2 ${isMain2InView ? "active" : ""
                   } `}
                 ref={main2Ref}
               >
@@ -198,7 +198,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               </h5>
             </div>
             <div>
-              <p className="mt-5 text-sm md:text-base font-legan tracking-widest text-white">
+              <p className="mt-5 text-base md:text-lg font-legan tracking-widest text-white text-shadow-readable">
                 {isProceeded ? '#roMAnSAsatuhati' : `Dear, ${name || 'Tamu Undangan'}`}
               </p>
               {!isOpen ? (
@@ -234,13 +234,13 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 ref={slide1Ref}
                 className={` ${isSlide1InView ? "active" : ""}  fadeInMove`}
               >
-                <h1 className="text-xl md:text-2xl font-ovo tracking-wide text-white uppercase">
+                <h1 className="text-2xl md:text-3xl font-ovo tracking-wide text-white uppercase text-shadow-readable">
                   {config.bibleVerse}
                 </h1>
-                <p className="text-sm mt-5 font-legan">
+                <p className="text-base md:text-lg mt-5 font-legan text-shadow-readable">
                   {config.bibleVerseContent}
                 </p>
-                <p className="text-6xl mt-5 font-wonder">{config.coupleNames}</p>
+                <p className="text-7xl md:text-8xl mt-5 font-wonder text-shadow-readable">{config.coupleNames}</p>
               </div>
             </div>
               </>
@@ -259,63 +259,63 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               <div>
                 <h1
                   ref={slide4Ref}
-                  className={`text-xl md:text-5xl  text-white font-ovo fadeInMove ${isSlide4InView ? " active" : ""
+                  className={`text-3xl md:text-5xl text-white font-ovo text-shadow-readable fadeInMove ${isSlide4InView ? " active" : ""
                     }`}
                 >
                   A journey in love
                 </h1>
                 <h3
                   ref={slide4Ref}
-                  className={`uppercase font-legan text-xl mt-5 mb-2 fadeInMoveSlow ${isSlide4InView ? " active" : ""
+                  className={`uppercase font-legan text-xl md:text-2xl mt-5 mb-2 text-shadow-readable fadeInMoveSlow ${isSlide4InView ? " active" : ""
                     }`}
                 >
                   {config.timeline_1}
                 </h3>
                 <p
                   ref={slide4Ref}
-                  className={`text-xs font-legan text-white fadeInLeftSlow ${isSlide4InView ? "active" : ""
+                  className={`text-sm md:text-base font-legan text-white text-shadow-readable fadeInLeftSlow ${isSlide4InView ? "active" : ""
                     }`}
                 >
                   {config.timeline_1_content}
                 </p>
                 <h3
                   ref={slide4Ref}
-                  className={`uppercase font-legan text-xl mt-5 mb-2 fadeInMoveSlow ${isSlide4InView ? " active" : ""
+                  className={`uppercase font-legan text-xl md:text-2xl mt-5 mb-2 text-shadow-readable fadeInMoveSlow ${isSlide4InView ? " active" : ""
                     }`}
                 >
                   {config.timeline_2}
                 </h3>
                 <p
                   ref={slide4Ref}
-                  className={`text-xs font-legan text-white fadeInLeftSlow ${isSlide4InView ? " active" : ""
+                  className={`text-sm md:text-base font-legan text-white text-shadow-readable fadeInLeftSlow ${isSlide4InView ? " active" : ""
                     }`}
                 >
                   {config.timeline_2_content}
                 </p>
                 <h3
                   ref={slide4Ref}
-                  className={`uppercase font-legan text-xl mt-5 mb-2 fadeInMoveSlow ${isSlide4InView ? " active" : ""
+                  className={`uppercase font-legan text-xl md:text-2xl mt-5 mb-2 text-shadow-readable fadeInMoveSlow ${isSlide4InView ? " active" : ""
                     }`}
                 >
                   {config.timeline_3}
                 </h3>
                 <p
                   ref={slide4Ref}
-                  className={`text-xs font-legan text-white fadeInLeftSlow ${isSlide4InView ? " active" : ""
+                  className={`text-sm md:text-base font-legan text-white text-shadow-readable fadeInLeftSlow ${isSlide4InView ? " active" : ""
                     }`}
                 >
                   {config.timeline_3_content}
                 </p>
                 <h3
                   ref={slide4Ref}
-                  className={`uppercase font-legan text-xl mt-5 mb-2 fadeInMoveSlow ${isSlide4InView ? " active" : ""
+                  className={`uppercase font-legan text-xl md:text-2xl mt-5 mb-2 text-shadow-readable fadeInMoveSlow ${isSlide4InView ? " active" : ""
                     }`}
                 >
                   {config.timeline_4}
                 </h3>
                 <p
                   ref={slide4Ref}
-                  className={`text-xs font-legan text-white fadeInLeftSlow ${isSlide4InView ? " active" : ""
+                  className={`text-sm md:text-base font-legan text-white text-shadow-readable fadeInLeftSlow ${isSlide4InView ? " active" : ""
                     }`}
                 >
                   {config.timeline_4_content}
@@ -349,10 +349,10 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 ref={slideBrideGroomRef}
                 className={` ${isSlideBrideGroomInView ? "active" : ""} fadeInMove text-center flex flex-col items-center justify-center`}
               >
-                <p className="text-base md:text-lg font-legan text-white mb-4">
+                <p className="text-lg md:text-xl font-legan text-white mb-4 text-shadow-readable">
                   {config.brideGroomGreeting}
                 </p>
-                <p className="text-sm md:text-base font-legan text-[#CCCCCC]">
+                <p className="text-base md:text-lg font-legan text-white text-shadow-readable">
                   {config.brideGroomText}
                 </p>
               </div>
@@ -375,12 +375,12 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 ref={slide2Ref}
                 className={`fadeInMove ${isSlide2InView ? "active" : ""}  `}
               >
-                <p className="font-legan text-sm my-2">The Bride</p>
-                <h1 className="text-xl md:text-3xl text-white  font-ovo">
+                <p className="font-legan text-base md:text-lg my-2 text-shadow-readable">The Bride</p>
+                <h1 className="text-3xl md:text-4xl text-white font-ovo text-shadow-readable">
                   {config.bride}
                 </h1>
-                <h3 className="font-thesignature text-2xl">About {config.brideNickName},</h3>
-                <p className="text-sm mt-5 font-legan text-[#CCCCCC]">
+                <h3 className="font-thesignature text-3xl md:text-4xl text-shadow-readable">About {config.brideNickName},</h3>
+                <p className="text-base md:text-lg mt-5 font-legan text-white text-shadow-readable">
                   {config.brideBio}
                 </p>
                 <Link
@@ -409,12 +409,12 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 ref={slide3Ref}
                 className={`fadeInMove ${isSlide3InView ? "active" : ""}  `}
               >
-                <p className="font-legan text-sm my-2">The Groom</p>
-                <h1 className="text-xl md:text-3xl text-white  font-ovo">
+                <p className="font-legan text-base md:text-lg my-2 text-shadow-readable">The Groom</p>
+                <h1 className="text-3xl md:text-4xl text-white font-ovo text-shadow-readable">
                   {config.groom}
                 </h1>
-                <h3 className="font-thesignature text-2xl">About {config.groomNickName},</h3>
-                <p className="text-sm mt-5 font-legan text-[#CCCCCC]">
+                <h3 className="font-thesignature text-3xl md:text-4xl text-shadow-readable">About {config.groomNickName},</h3>
+                <p className="text-base md:text-lg mt-5 font-legan text-white text-shadow-readable">
                   {config.groomBio}
                 </p>
                 <Link
@@ -444,10 +444,10 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 className={` ${isSlide5InView ? "active" : ""
                   }  fadeInMove flex items-center flex-col pt-12 `}
               >
-                <h3 className="uppercase font-legan text-xs tracking-wide mt-5 mb-2">
+                <h3 className="uppercase font-legan text-sm md:text-base tracking-wide mt-5 mb-2 text-shadow-readable">
                   save our date
                 </h3>
-                <h1 className="text-2xl w-[200px] text-center text-white  font-ovo uppercase">
+                <h1 className="text-3xl md:text-4xl w-[250px] text-center text-white font-ovo uppercase text-shadow-readable leading-snug">
                   {new Date(config.eventDate).toLocaleDateString("en-US", {
                     weekday: "long",
                   })} <br />  {new Date(config.eventDate).toLocaleDateString("en-US", {
@@ -458,10 +458,10 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 </h1>
                 {config.holyMatrimony.enabled && (
                   <div className="mt-5 mx-auto flex flex-col items-center">
-                    <h3 className="uppercase font-ovo text-sm text-center mt-5 mb-2">
+                    <h3 className="uppercase font-ovo text-base md:text-lg text-center mt-5 mb-2 text-shadow-readable">
                       AKAD NIKAH <br /> {config.holyMatrimony.time}
                     </h3>
-                    <p className="text-sm text-center  font-legan text-white">
+                    <p className="text-base md:text-lg text-center font-legan text-white text-shadow-readable">
                       {config.holyMatrimony.place} <br /> {config.holyMatrimony.place_details}
                     </p>
                     {/* Hanya tampil kalau lokasi BEDA dengan resepsi */}
@@ -479,10 +479,10 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
 
                 {config.weddingReception.enabled && (
                   <div className="mt-5 mx-auto flex  flex-col items-center">
-                    <h3 className="uppercase font-ovo text-sm text-center mt-5 mb-2">
+                    <h3 className="uppercase font-ovo text-base md:text-lg text-center mt-5 mb-2 text-shadow-readable">
                       Wedding Reception <br /> {config.weddingReception.time}
                     </h3>
-                    <p className="text-sm text-center  font-legan text-white">
+                    <p className="text-base md:text-lg text-center font-legan text-white text-shadow-readable">
                       {config.weddingReception.place} <br /> {config.weddingReception.place_details}
                     </p>
                     {/* Hanya tampil kalau lokasi BEDA dengan akad */}
@@ -530,8 +530,8 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 className={` ${isSlide6InView ? "active" : ""
                   }  fadeInMove flex items-center flex-col`}
               >
-                <h1 className="text-2xl text-center text-white  font-ovo">
-                  ALMOST TIME FOR OURCELEBRATION
+                <h1 className="text-3xl md:text-4xl text-center text-white font-ovo text-shadow-readable leading-snug mb-4">
+                  ALMOST TIME FOR OUR CELEBRATION
                 </h1>
                 {/* Countdown Timer */}
                 <CountdownTimer eventDate={config.eventDate} />
@@ -575,10 +575,10 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 ref={slide9Ref}
                 className={`${isSlide9InView ? "active" : ""} fadeInMove`}
               >
-                <h1 className="text-3xl text-white font-ovo text-center uppercase">
+                <h1 className="text-3xl md:text-4xl text-white font-ovo text-center uppercase text-shadow-readable">
                   RSVP AND WISHES
                 </h1>
-                <p className="text-sm font-legan text-white/80 text-center">
+                <p className="text-base md:text-lg font-legan text-white text-center text-shadow-readable mt-2">
                 {config.rsvp.detail}
                 </p>
 
@@ -600,7 +600,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 ref={slide10Ref}
                 className={`${isSlide10InView ? "active" : ""} fadeInMove`}
               >
-                <h1 className="text-3xl text-white font-ovo text-center uppercase">
+                <h1 className="text-3xl md:text-4xl text-white font-ovo text-center uppercase text-shadow-readable">
                   Wishes
                 </h1>
                 <WishesList refreshTrigger={refreshTrigger} />
@@ -623,15 +623,15 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 ref={endRef}
                 className={` ${isEndInView ? "active" : ""} fadeInMove `}
               >
-                <h1 className="text-3xl text-white  font-ovo text-center uppercase">
+                <h1 className="text-3xl md:text-5xl text-white font-ovo text-center uppercase text-shadow-readable">
                   {config.thankyou}
                 </h1>
 
                 <div className="mt-5 mx-auto flex flex-col ">
-                  <p className="text-sm font-legan text-white text-center">
+                  <p className="text-base md:text-lg font-legan text-white text-center text-shadow-readable">
                     {config.thankyouDetail}
                   </p>
-                  <p className="text-sm rounded-full text-center font-ovo mt-5 px-6 py-2 text-white uppercase">
+                  <p className="text-base md:text-lg rounded-full text-center font-ovo mt-5 px-6 py-2 text-white uppercase text-shadow-readable">
                     {config.coupleNames}
                   </p>
                 </div>
@@ -662,7 +662,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               >
                 <h1
                   ref={slide7Ref}
-                  className={`text-2xl text-white  font-ovo fadeInMoveSlow ${isSlide7InView ? "active" : ""
+                  className={`text-3xl md:text-4xl text-white font-ovo text-shadow-readable leading-snug fadeInMoveSlow ${isSlide7InView ? "active" : ""
                     }`}
                 >
                   JOIN OUR EXCLUSIVE LIVE STREAMING EVENT
@@ -673,7 +673,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                     }`}
                   ref={slide7Ref}
                 >
-                  <h3 className="uppercase font-ovo text-sm mt-5 mb-2">
+                  <h3 className="uppercase font-ovo text-base md:text-lg mt-5 mb-2 text-shadow-readable">
                     {new Date(config.eventDate).toLocaleDateString("en-US", {
                       weekday: "long",
                       year: "numeric",
@@ -682,7 +682,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                     })}
                     <br /> {config.livestreaming.time}
                   </h3>
-                  <p className="text-sm font-legan text-white">
+                  <p className="text-base md:text-lg font-legan text-white text-shadow-readable">
                     {config.livestreaming.detail}
                   </p>
                   <Link
@@ -709,7 +709,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                   ref={slide8Ref}
                   className={`${isSlide8InView ? "active" : ""} fadeInMove `}
                 >
-                  <h1 className="text-3xl text-white  font-ovo text-center uppercase">
+                  <h1 className="text-3xl md:text-4xl text-white font-ovo text-center uppercase text-shadow-readable mb-4 leading-snug">
                     Unveiling Our Prewedding Story
                   </h1>
                   <div
@@ -727,7 +727,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                   </div>
 
                   <div className="-mt-12 w-72 transform skew-x-6 drop-shadow">
-                    <p className="text-3xl font-thesignature text-white/80 ">
+                    <p className="text-4xl md:text-5xl font-thesignature text-white text-shadow-readable mt-6">
                       {config.prewedding.detail}
                     </p>
                   </div>

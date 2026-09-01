@@ -19,6 +19,9 @@ const INVITATION_BASE_URL = (
   'https://anisa.maulanamalik.my.id'
 ).replace(/\/$/, '')
 const searchableText = (value) => String(value ?? '').toLowerCase()
+const authTimeout = () => new Promise((resolve) => {
+  window.setTimeout(() => resolve({ data: { session: null } }), 4500)
+})
 
 function Admin() {
   const [guests, setGuests] = useState([])
@@ -155,7 +158,7 @@ function Admin() {
   useEffect(() => {
     let mounted = true
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    Promise.race([supabase.auth.getSession(), authTimeout()]).then(({ data: { session } }) => {
       if (!mounted) return
       setIsLoggedIn(Boolean(session))
       setCheckingAuth(false)
@@ -199,37 +202,6 @@ function Admin() {
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [isLoggedIn])
-
-  useEffect(() => {
-    if (!isLoggedIn) return
-    let syncing = false
-
-    const syncActiveBatches = async () => {
-      if (syncing) return
-      syncing = true
-      try {
-        const { data: activeBatches, error: activeBatchError } = await supabase
-          .from(SUPABASE_TABLES.invitationBulkBatches)
-          .select('id')
-          .in('status', ['creating', 'pending', 'processing'])
-
-        if (activeBatchError) throw activeBatchError
-        await Promise.all((activeBatches || []).map(batch => (
-          supabase.functions.invoke('send-invitations-bulk', {
-            body: { action: 'status', batchId: batch.id }
-          })
-        )))
-      } catch (syncError) {
-        console.error('Background bulk sync failed:', syncError)
-      } finally {
-        syncing = false
-      }
-    }
-
-    void syncActiveBatches()
-    const syncTimer = window.setInterval(syncActiveBatches, 5000)
-    return () => window.clearInterval(syncTimer)
   }, [isLoggedIn])
 
   const generateQRCode = async (guest) => {
@@ -695,20 +667,18 @@ function Admin() {
     setError(null)
 
     try {
-      const { data, error: invokeError } = await supabase.functions.invoke('send-invitation', {
-        body: { guestId: guest.id }
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (!sessionData.session?.access_token) throw new Error('Sesi admin sudah berakhir')
+      const response = await fetch('/api/whatsapp/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionData.session.access_token}`
+        },
+        body: JSON.stringify({ guestId: guest.id })
       })
-
-      if (invokeError) {
-        let message = invokeError.message
-        try {
-          const details = await invokeError.context?.json()
-          message = details?.error || message
-        } catch {
-          // Keep the SDK error when the response body is not JSON.
-        }
-        throw new Error(message)
-      }
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Pengiriman gagal')
 
       setSuccess(`Undangan berhasil dikirim ke ${guest.nama_tamu} melalui ${data.senderName}`)
       await fetchGuests()
@@ -921,7 +891,7 @@ function Admin() {
             Scan
           </Link>
           <Link
-            to="/admin/bulk-invitations"
+            to="/whatsapp"
             className="btn-pearl-capsule"
             style={{
               fontSize: '12px',
@@ -933,7 +903,7 @@ function Admin() {
             }}
           >
             <Icon name="send" size={14} />
-            Monitor Bulk
+            WhatsApp
           </Link>
           <button
             className="btn-pearl-capsule"
@@ -1313,9 +1283,9 @@ function Admin() {
                             <span className="text-fine-print" style={{ display: 'block', marginTop: '3px' }}>
                               {guest.invitation_delivery_method === 'manual'
                                 ? 'Manual'
-                                : guest.invitation_delivery_method === 'openwa_bulk'
-                                  ? 'OpenWA Bulk'
-                                  : 'OpenWA'}
+                                : guest.invitation_delivery_method === 'baileys_bulk'
+                                  ? 'WhatsApp Bulk'
+                                  : 'WhatsApp'}
                             </span>
                           )}
                         </td>

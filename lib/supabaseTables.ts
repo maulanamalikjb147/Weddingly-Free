@@ -7,4 +7,7 @@ export const SUPABASE_TABLES = {
   rsvps: '_siraman_rsvps',
   weddingCmsAssets: '_siraman_wedding_cms_assets',
   weddingCmsSettings: '_siraman_wedding_cms_settings',
+  whatsappAuth: '_siraman_whatsapp_auth',
+  whatsappLogs: '_siraman_whatsapp_logs',
+  whatsappSessions: '_siraman_whatsapp_sessions',
 } as const;

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@hapi/boom": "^10.0.1",
-    "@next/font": "^14.2.10",
+    "@next/font": "^14.2.15",
     "@supabase/supabase-js": "^2.112.4",
     "@whiskeysockets/baileys": "^7.0.0-rc14",
     "framer-motion": "^13.1.1",

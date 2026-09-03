@@ -44,7 +44,7 @@ const ScreenStart = ({ config, isRoot = false }: { config: WeddingConfig, isRoot
     >
       <TypeAnimation
         sequence={[
-          "THE WEDDING OF",
+          isRoot ? "SIRAMAN DAN PENGAJIAN" : "THE WEDDING OF",
           2000, 
           config.coupleNames.toUpperCase(),
           1000,

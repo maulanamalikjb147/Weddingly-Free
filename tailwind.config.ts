@@ -13,6 +13,10 @@ const config: Config = {
         legan: ["var(--font-legan)", "serif"],
         wonder: ["var(--font-wonder)", "sans-serif"],
         thesignature: ["var(--font-thesignature)", "serif"],
+        andika: ["var(--font-andika)", "sans-serif"],
+        dancingscript: ["var(--font-dancing-script)", "cursive"],
+        courgette: ["var(--font-courgette)", "cursive"],
+        notonaskharabic: ["var(--font-noto-naskh-arabic)", "serif"],
       },
       colors: {
         background: "var(--background)",

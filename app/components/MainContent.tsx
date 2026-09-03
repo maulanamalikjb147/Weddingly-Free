@@ -18,9 +18,10 @@ type WeddingScreenProps = {
   config: WeddingConfig;
   onOpenInvitation?: () => void;
   isProceeded?: boolean;
+  isRoot?: boolean;
 };
 
-const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: WeddingScreenProps) => {
+const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false, isRoot = false }: WeddingScreenProps) => {
   const [fadeClass, setFadeClass] = useState("opacity-0");
   const [isOpen, setIsOpen] = useState(false);
 
@@ -136,7 +137,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
       {/* Konten teks sisi kanan bisa scroll untuk pc */}
       <div className=" md:w-1/3 h-full overflow-y-scroll snap-y snap-mandatory scroll-smooth relative">
         <div
-          id="backgroundWedding"
+          id="beranda"
           className=" snap-start relative w-full h-screen flex items-center justify-center "
         >
           {/* Background Layer with Crossfade */}
@@ -175,7 +176,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                   } `}
                 ref={main2Ref}
               >
-                The Wedding Of
+                {isRoot ? "Siraman dan pengajian" : "The Wedding Of"}
               </h5>
               <h1
                 className={`text-3xl md:text-5xl font-ovo text-white uppercase text-shadow-readable fadeMain ${isMainInView ? "active" : ""
@@ -338,6 +339,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               <>
                 {/* Slide Bride & Groom (Slide 1.5) */}
             <div
+              id="mempelai"
               className={`text-white h-screen flex flex-col justify-center items-center p-5 px-12 snap-start `}
               style={{
                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.bg_bride_groom || "/foto_1_samping.jpg"})`,
@@ -432,6 +434,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               <>
                 {/* Slide 5 */}
             <div
+              id="waktu"
               className="snap-start  text-white h-screen flex flex-col items-center px-12 "
               style={{
                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${config.backgrounds?.slide_5 || "/slide_5.jpg"})`,
@@ -548,10 +551,10 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               </>
             )}
             {sectionKey === 'galeri' && (
-              <>
+              <div id="galeri" className="w-full">
                 {/* Gallery Section */}
             <GallerySection config={config} />
-              </>
+              </div>
             )}
             {sectionKey === 'rekening' && (
               <>
@@ -560,7 +563,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               </>
             )}
             {sectionKey === 'rsvp' && (
-              <>
+              <div id="ucapan" className="w-full">
                 {/* SLIDE 9 */}
             {config.rsvp.enabled && (
             <div
@@ -606,7 +609,7 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
                 <WishesList refreshTrigger={refreshTrigger} />
               </div>
             </div>
-              </>
+              </div>
             )}
             {sectionKey === 'thankyou' && (
               <>

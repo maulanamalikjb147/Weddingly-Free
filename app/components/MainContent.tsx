@@ -10,7 +10,6 @@ import GallerySection from "./GallerySection";
 import GiftsSection from "./GiftsSection";
 import type { WeddingConfig } from "@/lib/config";
 import MusicPlayer from "./MusicPlayer";
-import WaveSeparator from "./WaveSeparator";
 
 type WeddingScreenProps = {
   name?: string;
@@ -20,7 +19,7 @@ type WeddingScreenProps = {
   isRoot?: boolean;
 };
 
-export default function WeddingScreen({ name, config, onOpenInvitation, isProceeded = false, isRoot = false }: WeddingScreenProps) {
+export default function WeddingScreen({ name, config, onOpenInvitation, isProceeded = false }: WeddingScreenProps) {
   const [fadeClass, setFadeClass] = useState("opacity-0");
   const [isOpen, setIsOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -129,7 +128,7 @@ export default function WeddingScreen({ name, config, onOpenInvitation, isProcee
 
         {isOpen && (
           <div className="w-full">
-            {sections.map((sectionKey, index) => {
+            {sections.map((sectionKey) => {
               const isFullScreenSection = sectionKey === 'galeri' || sectionKey === 'rekening';
               return (
                 <Fragment key={sectionKey}>

@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Check, RefreshCw, Save, X, ImagePlus, Trash2, Upload, GripVertical } from 'lucide-react'
+import { ArrowLeft, Check, RefreshCw, Save, X, ImagePlus, Trash2, Upload, GripVertical, ChevronUp, ChevronDown } from 'lucide-react'
 import { supabase } from './supabaseClient'
 import { defaultConfig } from '@/lib/config'
 import { SUPABASE_TABLES } from '@/lib/supabaseTables'
@@ -87,9 +87,20 @@ export default function ContentCms() {
       const { data, error } = await supabase.from(SUPABASE_TABLES.weddingCmsSettings).select('content').eq('id', 'default').maybeSingle()
       if (error) throw error
       if (data && data.content) {
+        let loadedOrder = data.content.sectionOrder ? [...data.content.sectionOrder] : ['ayat', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'timeline', 'galeri', 'rsvp', 'rekening', 'thankyou'];
+        const galeriIdx = loadedOrder.indexOf('galeri');
+        const rsvpIdx = loadedOrder.indexOf('rsvp');
+        const rekeningIdx = loadedOrder.indexOf('rekening');
+        if (galeriIdx !== -1 && rsvpIdx !== -1 && rekeningIdx !== -1 && rekeningIdx < rsvpIdx) {
+          loadedOrder = loadedOrder.filter(s => s !== 'rsvp');
+          const newGaleriIdx = loadedOrder.indexOf('galeri');
+          loadedOrder.splice(newGaleriIdx + 1, 0, 'rsvp');
+        }
+
         setContent({ 
           ...defaultConfig, 
           ...data.content,
+          sectionOrder: loadedOrder,
           backgrounds: { ...defaultConfig.backgrounds, ...(data.content.backgrounds || {}) },
           gallery: { ...defaultConfig.gallery, ...(data.content.gallery || {}) },
           gifts: { ...defaultConfig.gifts, ...(data.content.gifts || {}) },
@@ -310,6 +321,14 @@ export default function ContentCms() {
     newOrder.splice(dropIndex, 0, item);
     update('sectionOrder', newOrder);
     setDraggedIndex(null);
+  };
+
+  const moveSection = (fromIndex, toIndex) => {
+    const currentOrder = content?.sectionOrder ? [...content.sectionOrder] : ['ayat', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'timeline', 'galeri', 'rsvp', 'rekening', 'thankyou'];
+    if (toIndex < 0 || toIndex >= currentOrder.length) return;
+    const item = currentOrder.splice(fromIndex, 1)[0];
+    currentOrder.splice(toIndex, 0, item);
+    update('sectionOrder', currentOrder);
   };
 
   const renderTabContent = () => {
@@ -993,7 +1012,32 @@ export default function ContentCms() {
                       <strong>{SECTION_NAMES[tabId]}</strong>
                     </span>
                   </div>
-                  <GripVertical size={14} style={{ color: '#aaa', cursor: 'grab' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span 
+                      role="button"
+                      title="Pindah ke atas"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (index > 0) moveSection(index, index - 1);
+                      }}
+                      style={{ cursor: index === 0 ? 'default' : 'pointer', opacity: index === 0 ? 0.2 : 0.7, padding: '2px', display: 'flex', alignItems: 'center' }}
+                    >
+                      <ChevronUp size={14} />
+                    </span>
+                    <span 
+                      role="button"
+                      title="Pindah ke bawah"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const listLen = (content?.sectionOrder || []).length || 11;
+                        if (index < listLen - 1) moveSection(index, index + 1);
+                      }}
+                      style={{ cursor: index === ((content?.sectionOrder || []).length || 11) - 1 ? 'default' : 'pointer', opacity: index === ((content?.sectionOrder || []).length || 11) - 1 ? 0.2 : 0.7, padding: '2px', display: 'flex', alignItems: 'center' }}
+                    >
+                      <ChevronDown size={14} />
+                    </span>
+                    <GripVertical size={14} style={{ color: '#aaa', cursor: 'grab', marginLeft: '4px' }} />
+                  </div>
                 </button>
               ))}
               

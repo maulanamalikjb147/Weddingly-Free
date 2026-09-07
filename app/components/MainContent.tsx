@@ -40,7 +40,15 @@ export default function WeddingScreen({ name, config, onOpenInvitation, isProcee
     }
   };
 
-  const allSections = config.sectionOrder || ['ayat', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'timeline', 'galeri', 'rsvp', 'rekening', 'thankyou'];
+  let allSections = config.sectionOrder ? [...config.sectionOrder] : ['ayat', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'timeline', 'galeri', 'rsvp', 'rekening', 'thankyou'];
+  const galeriIdx = allSections.indexOf('galeri');
+  const rsvpIdx = allSections.indexOf('rsvp');
+  const rekeningIdx = allSections.indexOf('rekening');
+  if (galeriIdx !== -1 && rsvpIdx !== -1 && rekeningIdx !== -1 && rekeningIdx < rsvpIdx) {
+    allSections = allSections.filter(s => s !== 'rsvp');
+    const newGaleriIdx = allSections.indexOf('galeri');
+    allSections.splice(newGaleriIdx + 1, 0, 'rsvp');
+  }
   const sections = allSections.filter(sectionKey => {
     const isVisible = config.sectionVisibility?.[sectionKey as keyof typeof config.sectionVisibility] ?? true;
     if (!isVisible) return false;

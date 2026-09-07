@@ -48,7 +48,7 @@ const CountdownTimer = ({ eventDate }: { eventDate: string }) => {
   }, [timeLeft, eventDate]);
 
   return (
-    <div className="flex space-x-4 mt-5 text-center font-legan">
+    <div className="flex justify-center space-x-4 mt-5 text-center font-legan">
       <div className="flex flex-col">
         <span className="text-4xl font-bold">{timeLeft.days}</span>
         <span className="text-sm uppercase">Days</span>

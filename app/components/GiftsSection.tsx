@@ -27,14 +27,8 @@ export default function GiftsSection({ config }: Props) {
 
   return (
     <div
-      className="snap-start text-white min-h-screen flex flex-col justify-center py-16 px-8 relative"
-      style={{
-        backgroundImage: `url(${config.backgrounds?.bg_gifts || "/slide_8.jpg"})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      className="relative w-full text-white flex flex-col justify-center py-8 px-6 bg-transparent"
     >
-      <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none"></div>
       <div
         ref={ref}
         className={`${inView ? "active" : ""} fadeInMove w-full max-w-md mx-auto flex flex-col items-center relative z-10`}

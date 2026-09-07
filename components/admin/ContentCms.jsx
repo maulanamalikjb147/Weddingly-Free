@@ -256,7 +256,13 @@ export default function ContentCms() {
       setActiveTab('galeri')
     } else {
       updateNested('backgrounds', mediaTarget, asset.public_url)
-      setActiveTab('latar-belakang')
+      if (mediaTarget === 'slide_2') {
+        setActiveTab('cpw')
+      } else if (mediaTarget === 'slide_3') {
+        setActiveTab('cpp')
+      } else {
+        setActiveTab('latar-belakang')
+      }
     }
     setView('form')
   }
@@ -270,8 +276,8 @@ export default function ContentCms() {
     'acara': 'Detail Acara',
     'countdown': 'Countdown',
     'galeri': 'Galeri Foto',
+    'rsvp': 'Input RSVP & Ucapan',
     'rekening': 'Rekening (Gift)',
-    'rsvp': 'RSVP & Wishes',
     'thankyou': 'Pesan Penutup',
   };
   
@@ -297,7 +303,7 @@ export default function ContentCms() {
   const handleDrop = (e, dropIndex) => {
     e.preventDefault();
     if (draggedIndex === null || draggedIndex === dropIndex) return;
-    const currentOrder = content?.sectionOrder || ['ayat', 'timeline', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'galeri', 'rekening', 'rsvp', 'thankyou'];
+    const currentOrder = content?.sectionOrder || ['ayat', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'timeline', 'galeri', 'rsvp', 'rekening', 'thankyou'];
     const newOrder = [...currentOrder];
     const item = newOrder[draggedIndex];
     newOrder.splice(draggedIndex, 1);
@@ -320,12 +326,17 @@ export default function ContentCms() {
     if (activeTab === 'pengantar') return (
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
-          <div className="cms-repeat-head"><strong>Sesi Pengantar Mempelai</strong></div>
-          <div className="cms-fields-grid">
+          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <strong>Sesi Pengantar Mempelai</strong>
+            <Toggle label="Aktifkan" checked={content.sectionVisibility?.pengantar ?? true} onChange={(v) => updateNested('sectionVisibility', 'pengantar', v)} />
+          </div>
+          {(content.sectionVisibility?.pengantar ?? true) && (
+            <div className="cms-fields-grid">
             <Field label="Judul" value={content.brideGroomTitle} onChange={(v) => update('brideGroomTitle', v)} />
             <Field label="Salam" value={content.brideGroomGreeting} onChange={(v) => update('brideGroomGreeting', v)} />
             <TextArea label="Teks Doa / Pengantar" value={content.brideGroomText} onChange={(v) => update('brideGroomText', v)} rows={3} />
-          </div>
+            </div>
+          )}
         </article>
       </div>
     )
@@ -333,13 +344,37 @@ export default function ContentCms() {
     if (activeTab === 'cpw') return (
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
-          <div className="cms-repeat-head"><strong>Mempelai Wanita (CPW)</strong></div>
-          <div className="cms-fields-grid">
-            <Field label="Nama Lengkap" value={content.bride} onChange={(v) => update('bride', v)} />
-            <Field label="Nama Panggilan" value={content.brideNickName} onChange={(v) => update('brideNickName', v)} />
-            <Field label="Instagram" value={content.brideInstagram} onChange={(v) => update('brideInstagram', v)} />
-            <TextArea label="Bio / Detail Orang Tua" value={content.brideBio} onChange={(v) => update('brideBio', v)} />
+          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <strong>Mempelai Wanita (CPW)</strong>
+            <Toggle label="Aktifkan" checked={content.sectionVisibility?.cpw ?? true} onChange={(v) => updateNested('sectionVisibility', 'cpw', v)} />
           </div>
+          {(content.sectionVisibility?.cpw ?? true) && (
+            <div className="cms-fields-grid">
+              <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px', padding: '12px', background: '#f5f5f5', borderRadius: '8px' }}>
+                <div style={{ width: '70px', height: '70px', borderRadius: '50%', overflow: 'hidden', background: '#ccc', border: '2px solid #ddd', flexShrink: 0 }}>
+                  <img src={content.backgrounds?.slide_2 || "/foto_1_samping.jpg"} alt="CPW" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div>
+                  <button 
+                    type="button" 
+                    className="btn-primary" 
+                    style={{ padding: '6px 14px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    onClick={() => {
+                      setMediaTarget('slide_2')
+                      setView('media')
+                    }}
+                  >
+                    <ImagePlus size={14} /> Ganti Foto Mempelai Wanita
+                  </button>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#666' }}>Foto lingkaran profil mempelai wanita</p>
+                </div>
+              </div>
+              <Field label="Nama Lengkap" value={content.bride} onChange={(v) => update('bride', v)} />
+              <Field label="Nama Panggilan" value={content.brideNickName} onChange={(v) => update('brideNickName', v)} />
+              <Field label="Instagram" value={content.brideInstagram} onChange={(v) => update('brideInstagram', v)} />
+              <TextArea label="Bio / Detail Orang Tua" value={content.brideBio} onChange={(v) => update('brideBio', v)} />
+            </div>
+          )}
         </article>
       </div>
     )
@@ -347,13 +382,37 @@ export default function ContentCms() {
     if (activeTab === 'cpp') return (
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
-          <div className="cms-repeat-head"><strong>Mempelai Pria (CPP)</strong></div>
-          <div className="cms-fields-grid">
-            <Field label="Nama Lengkap" value={content.groom} onChange={(v) => update('groom', v)} />
-            <Field label="Nama Panggilan" value={content.groomNickName} onChange={(v) => update('groomNickName', v)} />
-            <Field label="Instagram" value={content.groomInstagram} onChange={(v) => update('groomInstagram', v)} />
-            <TextArea label="Bio / Detail Orang Tua" value={content.groomBio} onChange={(v) => update('groomBio', v)} />
+          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <strong>Mempelai Pria (CPP)</strong>
+            <Toggle label="Aktifkan" checked={content.sectionVisibility?.cpp ?? true} onChange={(v) => updateNested('sectionVisibility', 'cpp', v)} />
           </div>
+          {(content.sectionVisibility?.cpp ?? true) && (
+            <div className="cms-fields-grid">
+              <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px', padding: '12px', background: '#f5f5f5', borderRadius: '8px' }}>
+                <div style={{ width: '70px', height: '70px', borderRadius: '50%', overflow: 'hidden', background: '#ccc', border: '2px solid #ddd', flexShrink: 0 }}>
+                  <img src={content.backgrounds?.slide_3 || "/foto_1_samping.jpg"} alt="CPP" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div>
+                  <button 
+                    type="button" 
+                    className="btn-primary" 
+                    style={{ padding: '6px 14px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    onClick={() => {
+                      setMediaTarget('slide_3')
+                      setView('media')
+                    }}
+                  >
+                    <ImagePlus size={14} /> Ganti Foto Mempelai Pria
+                  </button>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#666' }}>Foto lingkaran profil mempelai pria</p>
+                </div>
+              </div>
+              <Field label="Nama Lengkap" value={content.groom} onChange={(v) => update('groom', v)} />
+              <Field label="Nama Panggilan" value={content.groomNickName} onChange={(v) => update('groomNickName', v)} />
+              <Field label="Instagram" value={content.groomInstagram} onChange={(v) => update('groomInstagram', v)} />
+              <TextArea label="Bio / Detail Orang Tua" value={content.groomBio} onChange={(v) => update('groomBio', v)} />
+            </div>
+          )}
         </article>
       </div>
     )
@@ -361,11 +420,16 @@ export default function ContentCms() {
     if (activeTab === 'ayat') return (
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
-          <div className="cms-repeat-head"><strong>Ayat Alkitab / Kutipan Suci</strong></div>
-          <div className="cms-fields-grid">
+          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <strong>Ayat Alkitab / Kutipan Suci</strong>
+            <Toggle label="Aktifkan" checked={content.sectionVisibility?.ayat ?? true} onChange={(v) => updateNested('sectionVisibility', 'ayat', v)} />
+          </div>
+          {(content.sectionVisibility?.ayat ?? true) && (
+            <div className="cms-fields-grid">
             <Field label="Sumber Ayat" value={content.bibleVerse} onChange={(v) => update('bibleVerse', v)} placeholder="Misal: 1 Korintus 13:4-7" />
             <TextArea label="Isi Kutipan" value={content.bibleVerseContent} onChange={(v) => update('bibleVerseContent', v)} />
-          </div>
+            </div>
+          )}
         </article>
       </div>
     )
@@ -373,8 +437,12 @@ export default function ContentCms() {
     if (activeTab === 'timeline') return (
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
-          <div className="cms-repeat-head"><strong>Timeline Cerita</strong></div>
-          <div className="cms-fields-grid">
+          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <strong>Timeline Cerita</strong>
+            <Toggle label="Aktifkan" checked={content.sectionVisibility?.timeline ?? true} onChange={(v) => updateNested('sectionVisibility', 'timeline', v)} />
+          </div>
+          {(content.sectionVisibility?.timeline ?? true) && (
+            <div className="cms-fields-grid">
             <Field label="Tahun/Judul 1" value={content.timeline_1} onChange={(v) => update('timeline_1', v)} />
             <TextArea label="Cerita 1" value={content.timeline_1_content} onChange={(v) => update('timeline_1_content', v)} rows={2} />
             <Field label="Tahun/Judul 2" value={content.timeline_2} onChange={(v) => update('timeline_2', v)} />
@@ -383,7 +451,8 @@ export default function ContentCms() {
             <TextArea label="Cerita 3" value={content.timeline_3_content} onChange={(v) => update('timeline_3_content', v)} rows={2} />
             <Field label="Tahun/Judul 4" value={content.timeline_4} onChange={(v) => update('timeline_4', v)} />
             <TextArea label="Cerita 4" value={content.timeline_4_content} onChange={(v) => update('timeline_4_content', v)} rows={2} />
-          </div>
+            </div>
+          )}
         </article>
       </div>
     )
@@ -404,14 +473,24 @@ export default function ContentCms() {
 
       return (
         <div className="cms-repeat-list">
-          {/* Akad Nikah */}
+          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <span style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#111827' }}>Seksi Detail Acara (Keseluruhan)</span>
+            <Toggle label="Tampilkan Seksi Acara" checked={content.sectionVisibility?.acara ?? true} onChange={(v) => updateNested('sectionVisibility', 'acara', v)} />
+          </div>
+          <div className="cms-fields-grid mb-6">
+            <Field label="Judul Utama Acara" value={content.acaraTitle} onChange={(v) => update('acaraTitle', v)} placeholder="Detail Acara" />
+            <TextArea label="Teks Pengantar Acara" value={content.acaraDescription} onChange={(v) => update('acaraDescription', v)} rows={3} placeholder="Dengan segala hormat..." />
+          </div>
+
+          {/* Pengajian */}
           <article className="cms-repeat-item">
             <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <strong>Pemberkatan / Akad Nikah</strong>
+              <strong>Pemberkatan / Pengajian</strong>
               <Toggle label="Aktifkan" checked={content.holyMatrimony.enabled} onChange={(v) => updateNested('holyMatrimony', 'enabled', v)} />
             </div>
             {content.holyMatrimony.enabled && (
               <div className="cms-fields-grid">
+                <Field label="Judul Acara 1" value={content.holyMatrimony.title} onChange={(v) => updateNested('holyMatrimony', 'title', v)} placeholder="Pengajian" />
                 <Field label="Waktu" value={content.holyMatrimony.time} onChange={(v) => updateNested('holyMatrimony', 'time', v)} />
                 <Field label="Nama Tempat" value={content.holyMatrimony.place} onChange={(v) => updateNested('holyMatrimony', 'place', v)} />
                 <TextArea label="Alamat Detail" value={content.holyMatrimony.place_details} onChange={(v) => updateNested('holyMatrimony', 'place_details', v)} rows={2} />
@@ -420,14 +499,15 @@ export default function ContentCms() {
             )}
           </article>
 
-          {/* Resepsi Pernikahan */}
+          {/* Siraman Pernikahan */}
           <article className="cms-repeat-item mt-4">
             <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <strong>Resepsi Pernikahan</strong>
+              <strong>Siraman Pernikahan</strong>
               <Toggle label="Aktifkan" checked={content.weddingReception.enabled} onChange={(v) => updateNested('weddingReception', 'enabled', v)} />
             </div>
             {content.weddingReception.enabled && (
               <div className="cms-fields-grid">
+                <Field label="Judul Acara 2" value={content.weddingReception.title} onChange={(v) => updateNested('weddingReception', 'title', v)} placeholder="Siraman" />
                 <Field label="Waktu" value={content.weddingReception.time} onChange={(v) => updateNested('weddingReception', 'time', v)} />
 
                 {/* Checkbox Samakan dengan Akad */}
@@ -444,7 +524,7 @@ export default function ContentCms() {
                       style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#22c55e' }}
                     />
                     <label htmlFor="sameAsAkad" style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 500, color: sameAsAkad ? '#15803d' : '#374151', userSelect: 'none' }}>
-                      Lokasi sama dengan Akad Nikah
+                      Lokasi sama dengan Pengajian
                     </label>
                     {sameAsAkad && <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#16a34a' }}>✓ Terhubung otomatis</span>}
                   </div>
@@ -479,7 +559,7 @@ export default function ContentCms() {
                       style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#1a73e8', color: '#fff', borderRadius: '6px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
                     >
                       🗺️ Buka Google Maps
-                      {sameAsAkad && <span style={{ opacity: 0.8, fontWeight: 400 }}>(lokasi akad)</span>}
+                      {sameAsAkad && <span style={{ opacity: 0.8, fontWeight: 400 }}>(lokasi pengajian)</span>}
                     </a>
                   </div>
                 )}
@@ -493,8 +573,13 @@ export default function ContentCms() {
     if (activeTab === 'countdown') return (
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
-          <div className="cms-repeat-head"><strong>Countdown & Tanggal Acara</strong></div>
-          <p className="cms-helper-text" style={{ marginTop: '8px', color: '#666', fontSize: '13px' }}>Tanggal acara diatur di tab <strong>Umum &amp; Tanggal</strong>. Section ini akan otomatis menampilkan countdown dan tombol Save the Date ke Google Calendar.</p>
+          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <strong>Countdown & Tanggal Acara</strong>
+            <Toggle label="Aktifkan" checked={content.sectionVisibility?.countdown ?? true} onChange={(v) => updateNested('sectionVisibility', 'countdown', v)} />
+          </div>
+          {(content.sectionVisibility?.countdown ?? true) && (
+            <p className="cms-helper-text" style={{ marginTop: '8px', color: '#666', fontSize: '13px' }}>Tanggal acara diatur di tab <strong>Umum &amp; Tanggal</strong>. Section ini akan otomatis menampilkan countdown dan tombol Save the Date ke Google Calendar.</p>
+          )}
           <div className="cms-fields-grid" style={{ marginTop: '12px' }}>
             <Field label="Nama Pasangan (untuk Google Calendar)" value={content.coupleNames} onChange={(v) => update('coupleNames', v)} />
           </div>
@@ -537,10 +622,13 @@ export default function ContentCms() {
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
           <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <strong>RSVP & Ucapan Selamat</strong>
-            <Toggle label="Aktifkan" checked={content.rsvp.enabled} onChange={(v) => updateNested('rsvp', 'enabled', v)} />
+            <strong>Ucapan & Konfirmasi Kehadiran</strong>
+            <div style={{ display: 'flex', gap: '20px' }}>
+              <Toggle label="Tampilkan Seksi" checked={content.sectionVisibility?.rsvp ?? true} onChange={(v) => updateNested('sectionVisibility', 'rsvp', v)} />
+              <Toggle label="Aktifkan Form" checked={content.rsvp.enabled} onChange={(v) => updateNested('rsvp', 'enabled', v)} />
+            </div>
           </div>
-          {content.rsvp.enabled && (
+          {(content.sectionVisibility?.rsvp ?? true) && content.rsvp.enabled && (
             <div className="cms-fields-grid">
               <TextArea label="Pesan Detail RSVP" value={content.rsvp.detail} onChange={(v) => updateNested('rsvp', 'detail', v)} rows={2} />
             </div>
@@ -552,97 +640,113 @@ export default function ContentCms() {
     if (activeTab === 'thankyou') return (
       <div className="cms-repeat-list">
         <article className="cms-repeat-item">
-          <div className="cms-repeat-head"><strong>Pesan Penutup (Thank You)</strong></div>
-          <div className="cms-fields-grid">
-            <Field label="Judul" value={content.thankyou} onChange={(v) => update('thankyou', v)} />
-            <TextArea label="Isi Pesan" value={content.thankyouDetail} onChange={(v) => update('thankyouDetail', v)} />
-          </div>
-        </article>
-      </div>
-    )
-
-    if (activeTab === 'galeri') return (
-      <div className="cms-repeat-list">
-        <article className="cms-repeat-item">
           <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <strong>Galeri Foto</strong>
-            <Toggle label="Aktifkan" checked={content.gallery?.enabled} onChange={(v) => updateNested('gallery', 'enabled', v)} />
+            <strong>Penutup & Terima Kasih</strong>
+            <Toggle label="Aktifkan" checked={content.sectionVisibility?.thankyou ?? true} onChange={(v) => updateNested('sectionVisibility', 'thankyou', v)} />
           </div>
-          {content.gallery?.enabled && (
-            <div className="mt-4">
-              <button 
-                type="button" 
-                className="btn-primary mb-4 w-full flex justify-center items-center gap-2" 
-                style={{ padding: '10px' }}
-                onClick={() => {
-                  setMediaTarget('galeri')
-                  setView('media')
-                }}
-              >
-                <ImagePlus size={16} /> Tambah Foto dari Media
-              </button>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                {content.gallery.photos?.map((photo, i) => (
-                  <div key={i} style={{ position: 'relative', aspectRatio: '1', border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>
-                    <img src={photo.src} alt="Gallery" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        const newPhotos = [...content.gallery.photos]
-                        newPhotos.splice(i, 1)
-                        updateNested('gallery', 'photos', newPhotos)
-                      }}
-                      style={{
-                        position: 'absolute', top: '8px', right: '8px', background: 'red', color: 'white',
-                        border: 'none', borderRadius: '50%', padding: '6px', cursor: 'pointer'
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
+          {(content.sectionVisibility?.thankyou ?? true) && (
+            <div className="cms-fields-grid">
+              <Field label="Judul" value={content.thankyou} onChange={(v) => update('thankyou', v)} />
+              <TextArea label="Isi Pesan" value={content.thankyouDetail} onChange={(v) => update('thankyouDetail', v)} />
             </div>
           )}
         </article>
       </div>
     )
 
-    if (activeTab === 'rekening') return (
+    if (activeTab === 'galeri') return (
       <div className="cms-repeat-list">
-        <article className="cms-repeat-item">
-          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <strong>Wedding Gift</strong>
-            <Toggle label="Aktifkan" checked={content.gifts?.enabled} onChange={(v) => updateNested('gifts', 'enabled', v)} />
+          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <span style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#111827' }}>Seksi Galeri (Keseluruhan)</span>
+            <Toggle label="Tampilkan Seksi Galeri" checked={content.sectionVisibility?.galeri ?? true} onChange={(v) => updateNested('sectionVisibility', 'galeri', v)} />
           </div>
-          {content.gifts?.enabled && (
-            <div className="mt-4">
-              {content.gifts.accounts?.map((acc, i) => (
-                <div key={i} style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', marginBottom: '16px', background: '#fcfcfc' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <strong style={{ fontSize: '12px', textTransform: 'uppercase', color: '#666' }}>Rekening {i + 1}</strong>
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        const newAccs = [...content.gifts.accounts]
-                        newAccs.splice(i, 1)
-                        updateNested('gifts', 'accounts', newAccs)
-                      }}
-                      style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                  <div className="cms-fields-grid">
-                    <Field label="Bank / E-Wallet" value={acc.bank} onChange={(v) => updateGiftsArray(i, 'bank', v)} placeholder="BCA / Mandiri / Dana" />
-                    <Field label="No. Rekening" value={acc.number} onChange={(v) => updateGiftsArray(i, 'number', v)} placeholder="123456789" />
-                    <Field label="Atas Nama" value={acc.owner} onChange={(v) => updateGiftsArray(i, 'owner', v)} placeholder="Nama Pemilik" />
+          {(content.sectionVisibility?.galeri ?? true) && (
+            <article className="cms-repeat-item">
+              <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <strong>Koleksi Foto</strong>
+                <Toggle label="Aktifkan Galeri" checked={content.gallery?.enabled} onChange={(v) => updateNested('gallery', 'enabled', v)} />
+              </div>
+              {content.gallery?.enabled && (
+                <div className="mt-4">
+                  <button 
+                    type="button" 
+                    className="btn-primary mb-4 w-full flex justify-center items-center gap-2" 
+                    style={{ padding: '10px' }}
+                    onClick={() => {
+                      setMediaTarget('galeri')
+                      setView('media')
+                    }}
+                  >
+                    <ImagePlus size={16} /> Tambah Foto dari Media
+                  </button>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    {content.gallery.photos?.map((photo, i) => (
+                      <div key={i} style={{ position: 'relative', aspectRatio: '1', border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>
+                        <img src={photo.src} alt="Gallery" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const newPhotos = [...content.gallery.photos]
+                            newPhotos.splice(i, 1)
+                            updateNested('gallery', 'photos', newPhotos)
+                          }}
+                          style={{
+                            position: 'absolute', top: '8px', right: '8px', background: 'red', color: 'white',
+                            border: 'none', borderRadius: '50%', padding: '6px', cursor: 'pointer'
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-              <button 
-                type="button" 
+              )}
+            </article>
+          )}
+      </div>
+    )
+
+    if (activeTab === 'rekening') return (
+      <div className="cms-repeat-list">
+        <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <span style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#111827' }}>Seksi Rekening (Keseluruhan)</span>
+          <Toggle label="Tampilkan Seksi Rekening" checked={content.sectionVisibility?.rekening ?? true} onChange={(v) => updateNested('sectionVisibility', 'rekening', v)} />
+        </div>
+        {(content.sectionVisibility?.rekening ?? true) && (
+          <article className="cms-repeat-item">
+            <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <strong>Daftar Rekening & Hadiah</strong>
+              <Toggle label="Aktifkan Rekening" checked={content.gifts?.enabled} onChange={(v) => updateNested('gifts', 'enabled', v)} />
+            </div>
+            {content.gifts?.enabled && (
+              <div className="mt-4">
+                {content.gifts.accounts?.map((acc, i) => (
+                  <div key={i} style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', marginBottom: '16px', background: '#fcfcfc' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <strong style={{ fontSize: '12px', textTransform: 'uppercase', color: '#666' }}>Rekening {i + 1}</strong>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          const newAccs = [...content.gifts.accounts]
+                          newAccs.splice(i, 1)
+                          updateNested('gifts', 'accounts', newAccs)
+                        }}
+                        style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    <div className="cms-fields-grid">
+                      <Field label="Bank / E-Wallet" value={acc.bank} onChange={(v) => updateGiftsArray(i, 'bank', v)} placeholder="BCA / Mandiri / Dana" />
+                      <Field label="No. Rekening" value={acc.number} onChange={(v) => updateGiftsArray(i, 'number', v)} placeholder="123456789" />
+                      <Field label="Atas Nama" value={acc.owner} onChange={(v) => updateGiftsArray(i, 'owner', v)} placeholder="Nama Pemilik" />
+                    </div>
+                  </div>
+                ))}
+                <button 
+                  type="button"
                 style={{ width: '100%', padding: '12px', border: '1px dashed #ccc', borderRadius: '8px', background: 'transparent', cursor: 'pointer' }}
                 onClick={() => {
                   const newAccs = [...(content.gifts?.accounts || []), { bank: '', number: '', owner: '' }]
@@ -654,33 +758,29 @@ export default function ContentCms() {
             </div>
           )}
         </article>
+        )}
       </div>
     )
     if (activeTab === 'latar-belakang') {
       const bgSections = [
-        { key: 'bg_sidebar', label: 'Sidebar / Sisi Kiri (Desktop)' },
-        { key: 'bg_welcome', label: 'Halaman Welcome (Utama)' },
-        { key: 'bg_bride_groom', label: 'Slide Pengantar Mempelai' },
-        { key: 'slide_1', label: 'Slide 1 (Ayat Alkitab)' },
-        { key: 'slide_2', label: 'Slide 2 (Mempelai Wanita)' },
-        { key: 'slide_3', label: 'Slide 3 (Mempelai Pria)' },
-        { key: 'slide_4', label: 'Slide 4 (Timeline)' },
-        { key: 'slide_5', label: 'Slide 5 (Detail Acara)' },
-        { key: 'slide_6', label: 'Slide 6 (Countdown)' },
-        { key: 'slide_7', label: 'Slide 7 (Live Streaming)' },
-        { key: 'slide_8', label: 'Slide 8 (Galeri)' },
-        { key: 'slide_9', label: 'Slide 9 (RSVP)' },
-        { key: 'slide_10', label: 'Slide 10 (Wishes)' },
-        { key: 'bg_gifts', label: 'Halaman Wedding Gift' },
+        { key: 'slide_8', label: 'Background Utama Undangan (Global Background)', desc: 'Latar belakang utama bertekstur yang tampil di seluruh bagian undangan dengan overlay gelap.' },
+        { key: 'bg_welcome', label: 'Latar Halaman Pembuka / Cover', desc: 'Gambar latar belakang khusus saat pertama kali undangan dibuka (sebelum tombol Buka Undangan diklik).' },
+        { key: 'bg_sidebar', label: 'Latar Sisi Kiri Desktop (Sidebar)', desc: 'Gambar statis besar yang muncul di sebelah kiri pada layar monitor / desktop.' },
       ]
 
       return (
         <div className="cms-repeat-list">
-          <div className="cms-block-title mb-4"><h3>Pilih Latar Belakang per Halaman</h3></div>
+          <div className="cms-block-title mb-4">
+            <h3>Pilih Latar Belakang Undangan</h3>
+            <p style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+              Undangan kini menggunakan sistem 1 latar belakang utama yang konsisten dan elegan agar tidak belang-belang atau acak-acakan.
+            </p>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             {bgSections.map((sec) => (
-              <div key={sec.key} style={{ border: '1px solid #eee', padding: '12px', borderRadius: '8px', background: '#fafafa' }}>
-                <p style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 'bold' }}>{sec.label}</p>
+              <div key={sec.key} style={{ border: '1px solid #eee', padding: '16px', borderRadius: '8px', background: '#fafafa' }}>
+                <p style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 'bold' }}>{sec.label}</p>
+                {sec.desc && <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#666', lineHeight: 1.4 }}>{sec.desc}</p>}
                 <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#ccc', borderRadius: '4px', overflow: 'hidden', marginBottom: '12px' }}>
                   {content.backgrounds?.[sec.key] ? (
                     <img src={content.backgrounds[sec.key]} alt={sec.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -875,7 +975,7 @@ export default function ContentCms() {
               <div className="cms-section-list-head">
                 <strong>Kategori Konten</strong>
               </div>
-              {(content?.sectionOrder || ['ayat', 'timeline', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'galeri', 'rekening', 'rsvp', 'thankyou']).map((tabId, index) => (
+              {(content?.sectionOrder || ['ayat', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'timeline', 'galeri', 'rsvp', 'rekening', 'thankyou']).map((tabId, index) => (
                 <button 
                   type="button" 
                   key={tabId} 

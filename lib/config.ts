@@ -2,20 +2,33 @@ import { supabase } from "@/lib/supabase";
 import { SUPABASE_TABLES } from "@/lib/supabaseTables";
 
 export const defaultConfig = {
-    sectionOrder: ['ayat', 'timeline', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'galeri', 'rekening', 'rsvp', 'thankyou'],
-    coupleNames: process.env.NEXT_PUBLIC_COUPLE_NAMES || "Default Names",
-    eventDate: process.env.NEXT_PUBLIC_EVENT_DATE || "2025-01-01T00:00:00",
-    groom: process.env.NEXT_PUBLIC_GROOM_NAME || "Default Groom",
-    groomNickName: process.env.NEXT_PUBLIC_GROOM_NICKNAME || "Default Nickname",
-    groomInstagram: process.env.NEXT_PUBLIC_GROOM_INSTAGRAM || "Default Instagram",
-    groomBio: process.env.NEXT_PUBLIC_GROOM_BIO || "Default Bio",
-    bride: process.env.NEXT_PUBLIC_BRIDE_NAME || "Default Bride",
-    brideNickName: process.env.NEXT_PUBLIC_BRIDE_NICKNAME || "Default Nickname",
-    brideInstagram: process.env.NEXT_PUBLIC_BRIDE_INSTAGRAM || "Default Instagram",
-    brideBio: process.env.NEXT_PUBLIC_BRIDE_BIO || "Default Bio",
+    sectionOrder: ['ayat', 'pengantar', 'cpw', 'cpp', 'acara', 'countdown', 'timeline', 'galeri', 'rsvp', 'rekening', 'thankyou'],
+    sectionVisibility: {
+        ayat: true,
+        timeline: true,
+        pengantar: true,
+        cpw: true,
+        cpp: true,
+        acara: true,
+        countdown: true,
+        galeri: true,
+        rekening: true,
+        rsvp: true,
+        thankyou: true
+    },
+    coupleNames: process.env.NEXT_PUBLIC_COUPLE_NAMES || "Anisa & Maulana",
+    eventDate: process.env.NEXT_PUBLIC_EVENT_DATE || "2026-09-24T00:00:00",
+    groom: process.env.NEXT_PUBLIC_GROOM_NAME || "Maulana",
+    groomNickName: process.env.NEXT_PUBLIC_GROOM_NICKNAME || "Maulana",
+    groomInstagram: process.env.NEXT_PUBLIC_GROOM_INSTAGRAM || "maulana",
+    groomBio: process.env.NEXT_PUBLIC_GROOM_BIO || "Putra.....",
+    bride: process.env.NEXT_PUBLIC_BRIDE_NAME || "Anisa Syafitri",
+    brideNickName: process.env.NEXT_PUBLIC_BRIDE_NICKNAME || "Anisa",
+    brideInstagram: process.env.NEXT_PUBLIC_BRIDE_INSTAGRAM || "anisa",
+    brideBio: process.env.NEXT_PUBLIC_BRIDE_BIO || "Putri bp.....",
     brideGroomTitle: process.env.NEXT_PUBLIC_BRIDE_GROOM_TITLE || "Bride & Groom",
-    brideGroomGreeting: process.env.NEXT_PUBLIC_BRIDE_GROOM_GREETING || "Assalamu`alaikum Warahmatullaahi Wabarakaatuh",
-    brideGroomText: process.env.NEXT_PUBLIC_BRIDE_GROOM_TEXT || "Maha Suci Allah yang telah menciptakan makhluk-Nya berpasang-pasangan. Ya Allah semoga ridho-Mu tercurah mengiringi pernikahan kami",
+    brideGroomGreeting: process.env.NEXT_PUBLIC_BRIDE_GROOM_GREETING || "Assalamualaikum Warahmatullahi wabarakatuh",
+    brideGroomText: process.env.NEXT_PUBLIC_BRIDE_GROOM_TEXT || "Dengan memohon rahmat dan ridho Allah SWT, kami bermaksud menyelenggarakan pernikahan putra/putri kami",
     bibleVerse: process.env.NEXT_PUBLIC_BIBLE_VERSE || "Default Bible Verse",
     bibleVerseContent: process.env.NEXT_PUBLIC_BIBLE_VERSE_CONTENT || "Default Bible Verse Content",
     timeline_1: process.env.NEXT_PUBLIC_YEAR_1 || "Default Timeline 1",
@@ -26,8 +39,11 @@ export const defaultConfig = {
     timeline_3_content: process.env.NEXT_PUBLIC_YEAR_3_CONTENT || "Default Timeline 3 Content",
     timeline_4: process.env.NEXT_PUBLIC_YEAR_4 || "Default Timeline 4",
     timeline_4_content: process.env.NEXT_PUBLIC_YEAR_4_CONTENT || "Default Timeline 4 Content",
+    acaraTitle: process.env.NEXT_PUBLIC_ACARA_TITLE || "Detail Acara",
+    acaraDescription: process.env.NEXT_PUBLIC_ACARA_DESCRIPTION || "Dengan segala hormat, kami bermaksud mengundang Bapak/Ibu/Saudara/I dalam rangkaian acara pengajian & siraman yang insyaallah dilaksanakan pada:",
     backgroundMusicUrl: process.env.NEXT_PUBLIC_BACKGROUND_MUSIC_URL || "",
     holyMatrimony: {
+        title: process.env.NEXT_PUBLIC_HOLY_MATRIMONY_TITLE || "Pengajian",
         enabled: process.env.NEXT_PUBLIC_HOLY_MATRIMONY === 'true',
         time: process.env.NEXT_PUBLIC_HOLY_MATRIMONY_TIME || "00:00",
         place: process.env.NEXT_PUBLIC_HOLY_MATRIMONY_PLACE || "Default Church",
@@ -35,6 +51,7 @@ export const defaultConfig = {
         googleMapsLink: process.env.NEXT_PUBLIC_HOLY_MATRIMONY_GOOGLE_MAPS || "https://maps.app.goo.gl/vPmfWux29qYYfkJTA",
     },
     weddingReception: {
+        title: process.env.NEXT_PUBLIC_WEDDING_RECEPTION_TITLE || "Siraman",
         enabled: process.env.NEXT_PUBLIC_WEDDING_RECEPTION === 'true',
         time: process.env.NEXT_PUBLIC_WEDDING_RECEPTION_TIME || "00:00",
         place: process.env.NEXT_PUBLIC_WEDDING_RECEPTION_PLACE || "Default Venue",
@@ -104,6 +121,10 @@ export async function fetchConfig(): Promise<WeddingConfig> {
       return {
         ...defaultConfig,
         ...data.content,
+        sectionVisibility: {
+          ...defaultConfig.sectionVisibility,
+          ...(data.content.sectionVisibility || {})
+        },
         backgrounds: {
           ...defaultConfig.backgrounds,
           ...(data.content.backgrounds || {})

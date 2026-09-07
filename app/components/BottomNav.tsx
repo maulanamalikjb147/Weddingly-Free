@@ -9,7 +9,7 @@ export default function BottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 w-full lg:w-5/12 xl:w-4/12 2xl:w-3/12 bg-black/80 backdrop-blur-md border-t border-white/20 z-50 rounded-t-2xl">
+    <nav className="fixed bottom-0 right-0 w-full md:w-1/3 bg-black/80 backdrop-blur-md border-t border-white/20 z-50 rounded-t-2xl">
       <ul className="flex justify-around items-center py-2 px-1 text-white/70">
         <li className="flex flex-col items-center cursor-pointer hover:text-white" onClick={() => scrollTo("beranda")}>
           <FaHome size={20} />

@@ -1,0 +1,404 @@
+{
+  "communities": {
+    "0": [
+      "framer_motion",
+      "html5_qrcode",
+      "lucide_react",
+      "mongodb",
+      "mongoose",
+      "next",
+      "next_font",
+      "package_dependencies",
+      "package_dependencies_framer_motion",
+      "package_dependencies_html5_qrcode",
+      "package_dependencies_lucide_react",
+      "package_dependencies_mongodb",
+      "package_dependencies_mongoose",
+      "package_dependencies_next",
+      "package_dependencies_next_font",
+      "package_dependencies_qrcode",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_react_icons",
+      "package_dependencies_react_intersection_observer",
+      "package_dependencies_react_type_animation",
+      "package_dependencies_supabase_supabase_js",
+      "qrcode",
+      "react",
+      "react_dom",
+      "react_icons",
+      "react_intersection_observer",
+      "react_type_animation",
+      "supabase_supabase_js"
+    ],
+    "1": [
+      "app_components_countdown",
+      "app_components_countdown_calculatetimeleft",
+      "app_components_countdown_countdowntimer",
+      "app_components_form",
+      "app_components_form_form",
+      "app_components_form_formprops",
+      "app_components_gallerysection",
+      "app_components_gallerysection_gallerysection",
+      "app_components_gallerysection_props",
+      "app_components_giftssection",
+      "app_components_giftssection_giftssection",
+      "app_components_giftssection_props",
+      "app_components_maincontent",
+      "app_components_maincontent_weddingscreen",
+      "app_components_maincontent_weddingscreenprops",
+      "app_components_musicplayer",
+      "app_components_musicplayer_musicplayer",
+      "app_components_screenstart",
+      "app_components_screenstart_screenstart",
+      "app_components_wisheslist",
+      "app_components_wisheslist_wish",
+      "app_components_wisheslist_wisheslist",
+      "app_components_wisheslist_wisheslistprops",
+      "lib_config_weddingconfig"
+    ],
+    "2": [
+      "app_components_qrprelude",
+      "app_components_qrprelude_qrprelude",
+      "app_layout",
+      "app_layout_generatemetadata",
+      "app_layout_legan",
+      "app_layout_ovo",
+      "app_layout_rootlayout",
+      "app_layout_thesignature",
+      "app_layout_wonder",
+      "app_page",
+      "app_page_home",
+      "app_slug_clienthomewrapper",
+      "app_slug_clienthomewrapper_clienthomewrapper",
+      "app_slug_clienthomewrapper_clienthomewrapperprops",
+      "app_slug_page",
+      "app_slug_page_home",
+      "app_slug_page_paramsprops",
+      "lib_config_fetchconfig",
+      "lib_guest",
+      "lib_guest_getweddingguest",
+      "lib_guest_weddingguest"
+    ],
+    "3": [
+      "app_admin_content_page",
+      "app_admin_content_page_contentcmspage",
+      "app_admin_content_page_metadata",
+      "app_api_get_route",
+      "app_api_get_route_get",
+      "app_api_submit_route",
+      "app_api_submit_route_get",
+      "app_api_submit_route_post",
+      "components_admin_contentcms",
+      "components_admin_contentcms_contentcms",
+      "components_admin_contentcms_field",
+      "components_admin_contentcms_textarea",
+      "components_admin_contentcms_toggle",
+      "lib_config",
+      "lib_config_defaultconfig",
+      "lib_supabase",
+      "lib_supabase_supabase",
+      "lib_supabasetables",
+      "lib_supabasetables_supabase_tables"
+    ],
+    "4": [
+      "eslint",
+      "eslint_config_next",
+      "package_devdependencies",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_config_next",
+      "package_devdependencies_postcss",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_qrcode",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "postcss",
+      "tailwindcss",
+      "types_node",
+      "types_qrcode",
+      "types_react",
+      "types_react_dom",
+      "typescript"
+    ],
+    "5": [
+      "ref_dom",
+      "ref_dom_iterable",
+      "ref_esnext",
+      "tsconfig_compileroptions",
+      "tsconfig_compileroptions_allowjs",
+      "tsconfig_compileroptions_esmoduleinterop",
+      "tsconfig_compileroptions_incremental",
+      "tsconfig_compileroptions_isolatedmodules",
+      "tsconfig_compileroptions_jsx",
+      "tsconfig_compileroptions_lib",
+      "tsconfig_compileroptions_module",
+      "tsconfig_compileroptions_moduleresolution",
+      "tsconfig_compileroptions_noemit",
+      "tsconfig_compileroptions_paths",
+      "tsconfig_compileroptions_plugins",
+      "tsconfig_compileroptions_resolvejsonmodule",
+      "tsconfig_compileroptions_skiplibcheck",
+      "tsconfig_compileroptions_strict"
+    ],
+    "6": [
+      "app_admin_page",
+      "app_admin_page_adminpage",
+      "app_admin_scan_page",
+      "app_admin_scan_page_adminscannerpage",
+      "components_admin_admin",
+      "components_admin_admin_admin",
+      "components_admin_admin_invitation_base_url",
+      "components_admin_admin_link",
+      "components_admin_admin_searchabletext",
+      "components_admin_adminguard",
+      "components_admin_adminguard_adminguard",
+      "components_admin_icon",
+      "components_admin_icon_icon",
+      "components_admin_scanner",
+      "components_admin_scanner_scanner",
+      "components_admin_supabaseclient",
+      "components_admin_supabaseclient_supabase"
+    ],
+    "7": [
+      "supabase_functions_send_invitations_bulk_index",
+      "supabase_functions_send_invitations_bulk_index_allowedorigins",
+      "supabase_functions_send_invitations_bulk_index_env",
+      "supabase_functions_send_invitations_bulk_index_invitationurl",
+      "supabase_functions_send_invitations_bulk_index_jsonresponse",
+      "supabase_functions_send_invitations_bulk_index_normalizebatchstatus",
+      "supabase_functions_send_invitations_bulk_index_normalizeitemstatus",
+      "supabase_functions_send_invitations_bulk_index_normalizephone",
+      "supabase_functions_send_invitations_bulk_index_openwaerrormessage",
+      "supabase_functions_send_invitations_bulk_index_parseopenwaresponse",
+      "supabase_functions_send_invitations_bulk_index_rendertemplate",
+      "supabase_functions_send_invitations_bulk_index_responseheaders",
+      "supabase_functions_send_invitations_bulk_index_resultchatid",
+      "supabase_functions_send_invitations_bulk_index_resulterror",
+      "supabase_functions_send_invitations_bulk_index_resultmessageid",
+      "supabase_functions_send_invitations_bulk_index_tables",
+      "supabase_functions_send_invitations_bulk_index_terminalbatchstatuses"
+    ],
+    "8": [
+      "scripts_load_env_local",
+      "scripts_load_env_local_fs",
+      "scripts_load_env_local_loadenvlocal",
+      "test",
+      "test_createclient",
+      "test_db",
+      "test_db_createclient",
+      "test_db_loadenvlocal",
+      "test_db_run",
+      "test_db_supabase",
+      "test_loadenvlocal",
+      "test_run",
+      "test_supabase"
+    ],
+    "9": [
+      "package",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_start",
+      "package_version"
+    ],
+    "10": [
+      "ref_next_env_d_ts",
+      "ref_next_types_ts",
+      "ref_node_modules",
+      "ref_supabase_functions",
+      "ref_ts",
+      "ref_tsx",
+      "tsconfig",
+      "tsconfig_exclude",
+      "tsconfig_include"
+    ],
+    "11": [
+      "supabase_functions_send_invitation_index",
+      "supabase_functions_send_invitation_index_allowedorigins",
+      "supabase_functions_send_invitation_index_env",
+      "supabase_functions_send_invitation_index_invitationurl",
+      "supabase_functions_send_invitation_index_jsonresponse",
+      "supabase_functions_send_invitation_index_normalizephone",
+      "supabase_functions_send_invitation_index_rendertemplate",
+      "supabase_functions_send_invitation_index_responseheaders",
+      "supabase_functions_send_invitation_index_tables"
+    ],
+    "12": [
+      "eslintrc",
+      "eslintrc_extends",
+      "ref_next_core_web_vitals",
+      "ref_next_typescript"
+    ],
+    "13": [
+      "app_admin_layout",
+      "app_admin_layout_adminlayout"
+    ],
+    "14": [
+      "lib_db",
+      "lib_db_connecttodatabase"
+    ],
+    "15": [
+      "lib_models_wish",
+      "lib_models_wish_wishschema"
+    ],
+    "16": [
+      "next_config",
+      "next_config_nextconfig"
+    ],
+    "17": [
+      "postcss_config",
+      "postcss_config_config"
+    ],
+    "18": [
+      "tailwind_config",
+      "tailwind_config_config"
+    ],
+    "19": [
+      "refactor_main"
+    ],
+    "20": [
+      "split_cerita"
+    ]
+  },
+  "cohesion": {
+    "0": 0.06896551724137931,
+    "1": 0.10869565217391304,
+    "2": 0.14761904761904762,
+    "3": 0.17543859649122806,
+    "4": 0.10526315789473684,
+    "5": 0.1111111111111111,
+    "6": 0.21323529411764705,
+    "7": 0.1323529411764706,
+    "8": 0.1794871794871795,
+    "9": 0.2222222222222222,
+    "10": 0.2222222222222222,
+    "11": 0.2777777777777778,
+    "12": 0.5,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0
+  },
+  "gods": [
+    {
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 15
+    },
+    {
+      "id": "lib_supabasetables_supabase_tables",
+      "label": "SUPABASE_TABLES",
+      "degree": 8
+    },
+    {
+      "id": "lib_config_fetchconfig",
+      "label": "fetchConfig()",
+      "degree": 7
+    },
+    {
+      "id": "lib_config_weddingconfig",
+      "label": "WeddingConfig",
+      "degree": 6
+    },
+    {
+      "id": "components_admin_supabaseclient_supabase",
+      "label": "supabase",
+      "degree": 5
+    },
+    {
+      "id": "lib_supabase_supabase",
+      "label": "supabase",
+      "degree": 5
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 5
+    },
+    {
+      "id": "tsconfig_include",
+      "label": "include",
+      "degree": 5
+    },
+    {
+      "id": "components_admin_admin_admin",
+      "label": "Admin()",
+      "degree": 4
+    },
+    {
+      "id": "components_admin_icon_icon",
+      "label": "Icon()",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "QrPrelude()",
+      "target": "qrcode",
+      "source_files": [
+        "app/components/QrPrelude.tsx",
+        "package.json"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "generateMetadata()",
+      "target": "fetchConfig()",
+      "source_files": [
+        "app/layout.tsx",
+        "lib/config.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `generateMetadata()` unexpectedly reaches hub `fetchConfig()`"
+    },
+    {
+      "source": "Home()",
+      "target": "fetchConfig()",
+      "source_files": [
+        "app/page.tsx",
+        "lib/config.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `Home()` unexpectedly reaches hub `fetchConfig()`"
+    },
+    {
+      "source": "Admin()",
+      "target": "qrcode",
+      "source_files": [
+        "components/admin/Admin.jsx",
+        "package.json"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "Home()",
+      "target": "fetchConfig()",
+      "source_files": [
+        "app/[slug]/page.tsx",
+        "lib/config.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories"
+    }
+  ],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}

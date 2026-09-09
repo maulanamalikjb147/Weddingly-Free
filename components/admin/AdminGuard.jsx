@@ -4,13 +4,17 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from './supabaseClient'
 
+const authTimeout = () => new Promise((resolve) => {
+  window.setTimeout(() => resolve({ data: { session: null } }), 4500)
+})
+
 export default function AdminGuard({ children }) {
   const router = useRouter()
   const [session, setSession] = useState(undefined)
 
   useEffect(() => {
     let mounted = true
-    supabase.auth.getSession().then(({ data }) => {
+    Promise.race([supabase.auth.getSession(), authTimeout()]).then(({ data }) => {
       if (!mounted) return
       setSession(data.session || null)
       if (!data.session) router.replace('/admin')

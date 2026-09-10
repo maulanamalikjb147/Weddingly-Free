@@ -45,6 +45,7 @@ export const defaultConfig = {
     holyMatrimony: {
         title: process.env.NEXT_PUBLIC_HOLY_MATRIMONY_TITLE || "Pengajian",
         enabled: process.env.NEXT_PUBLIC_HOLY_MATRIMONY === 'true',
+        date: process.env.NEXT_PUBLIC_HOLY_MATRIMONY_DATE || "Kamis, 24 September 2026",
         time: process.env.NEXT_PUBLIC_HOLY_MATRIMONY_TIME || "00:00",
         place: process.env.NEXT_PUBLIC_HOLY_MATRIMONY_PLACE || "Default Church",
         place_details: process.env.NEXT_PUBLIC_HOLY_MATRIMONY_PLACE_DETAILS || "Default Street",
@@ -53,6 +54,7 @@ export const defaultConfig = {
     weddingReception: {
         title: process.env.NEXT_PUBLIC_WEDDING_RECEPTION_TITLE || "Siraman",
         enabled: process.env.NEXT_PUBLIC_WEDDING_RECEPTION === 'true',
+        date: process.env.NEXT_PUBLIC_WEDDING_RECEPTION_DATE || "Kamis, 24 September 2026",
         time: process.env.NEXT_PUBLIC_WEDDING_RECEPTION_TIME || "00:00",
         place: process.env.NEXT_PUBLIC_WEDDING_RECEPTION_PLACE || "Default Venue",
         place_details: process.env.NEXT_PUBLIC_WEDDING_RECEPTION_PLACE_DETAILS || "Default Street",

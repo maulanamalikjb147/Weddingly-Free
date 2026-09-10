@@ -17,6 +17,52 @@ function Field({ label, value, onChange, type = 'text', placeholder }) {
   )
 }
 
+function DateField({ label, value, onChange, placeholder = "Contoh: Kamis, 24 September 2026", disabled = false }) {
+  const handleCalendarChange = (e) => {
+    if (disabled) return;
+    const val = e.target.value; // "YYYY-MM-DD"
+    if (val) {
+      const [year, month, day] = val.split('-');
+      const d = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const formatted = `${days[d.getDay()]}, ${parseInt(day, 10)} ${months[parseInt(month, 10) - 1]} ${year}`;
+      onChange(formatted);
+    }
+  };
+
+  return (
+    <label className="cms-field" style={{ opacity: disabled ? 0.6 : 1 }}>
+      <span>{label}</span>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <input 
+          type="text" 
+          className="input-field" 
+          value={value ?? ''} 
+          placeholder={placeholder} 
+          onChange={(event) => !disabled && onChange(event.target.value)} 
+          disabled={disabled}
+          style={{ flex: 1, background: disabled ? '#f3f4f6' : '#fff' }}
+        />
+        <input 
+          type="date" 
+          title="Pilih tanggal dari kalender"
+          disabled={disabled}
+          style={{ 
+            padding: '7px 8px', 
+            borderRadius: '6px', 
+            border: '1px solid #d1d5db', 
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            background: disabled ? '#f3f4f6' : '#fff',
+            fontSize: '13px'
+          }} 
+          onChange={handleCalendarChange} 
+        />
+      </div>
+    </label>
+  );
+}
+
 function TextArea({ label, value, onChange, rows = 4 }) {
   return (
     <label className="cms-field cms-field-wide">
@@ -337,7 +383,26 @@ export default function ContentCms() {
         <div className="cms-block-title"><h3>Informasi Dasar</h3></div>
         <div className="cms-fields-grid">
           <Field label="Nama Pasangan (Singkat)" value={content.coupleNames} onChange={(v) => update('coupleNames', v)} placeholder="Misal: Mikha & Clara" />
-          <Field label="Tanggal Acara (Format ISO)" value={content.eventDate} onChange={(v) => update('eventDate', v)} placeholder="2025-12-21T08:00:00" />
+          <div className="cms-field">
+            <span>Tanggal Acara (Countdown &amp; Google Calendar)</span>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input 
+                type="datetime-local" 
+                className="input-field" 
+                value={content.eventDate ? content.eventDate.slice(0, 16) : ''} 
+                onChange={(e) => update('eventDate', e.target.value ? e.target.value + ':00' : '')}
+                style={{ maxWidth: '220px' }}
+              />
+              <input 
+                type="text" 
+                className="input-field" 
+                value={content.eventDate ?? ''} 
+                onChange={(e) => update('eventDate', e.target.value)}
+                placeholder="2026-09-24T00:00:00"
+                style={{ flex: 1 }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -477,10 +542,11 @@ export default function ContentCms() {
     )
 
     if (activeTab === 'acara') {
-      // When sameAsAkad is toggled on, auto-sync place and googleMapsLink from holyMatrimony
+      // When sameAsAkad is toggled on, auto-sync place, date, and googleMapsLink from holyMatrimony
       const handleSameAsAkad = (checked) => {
         setSameAsAkad(checked)
         if (checked) {
+          updateNested('weddingReception', 'date', content.holyMatrimony.date || '')
           updateNested('weddingReception', 'place', content.holyMatrimony.place || '')
           updateNested('weddingReception', 'googleMapsLink', content.holyMatrimony.googleMapsLink || '')
         }
@@ -510,7 +576,8 @@ export default function ContentCms() {
             {content.holyMatrimony.enabled && (
               <div className="cms-fields-grid">
                 <Field label="Judul Acara 1" value={content.holyMatrimony.title} onChange={(v) => updateNested('holyMatrimony', 'title', v)} placeholder="Pengajian" />
-                <Field label="Waktu" value={content.holyMatrimony.time} onChange={(v) => updateNested('holyMatrimony', 'time', v)} />
+                <DateField label="Tanggal Acara (Hari, Tanggal Bulan Tahun)" value={content.holyMatrimony.date} onChange={(v) => updateNested('holyMatrimony', 'date', v)} placeholder="Contoh: Kamis, 24 September 2026" />
+                <Field label="Waktu" value={content.holyMatrimony.time} onChange={(v) => updateNested('holyMatrimony', 'time', v)} placeholder="12:00" />
                 <Field label="Nama Tempat" value={content.holyMatrimony.place} onChange={(v) => updateNested('holyMatrimony', 'place', v)} />
                 <TextArea label="Alamat Detail" value={content.holyMatrimony.place_details} onChange={(v) => updateNested('holyMatrimony', 'place_details', v)} rows={2} />
                 <Field label="Link Google Maps" value={content.holyMatrimony.googleMapsLink} onChange={(v) => updateNested('holyMatrimony', 'googleMapsLink', v)} />
@@ -527,7 +594,6 @@ export default function ContentCms() {
             {content.weddingReception.enabled && (
               <div className="cms-fields-grid">
                 <Field label="Judul Acara 2" value={content.weddingReception.title} onChange={(v) => updateNested('weddingReception', 'title', v)} placeholder="Siraman" />
-                <Field label="Waktu" value={content.weddingReception.time} onChange={(v) => updateNested('weddingReception', 'time', v)} />
 
                 {/* Checkbox Samakan dengan Akad */}
                 {content.holyMatrimony.enabled && (
@@ -543,11 +609,20 @@ export default function ContentCms() {
                       style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#22c55e' }}
                     />
                     <label htmlFor="sameAsAkad" style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 500, color: sameAsAkad ? '#15803d' : '#374151', userSelect: 'none' }}>
-                      Lokasi sama dengan Pengajian
+                      Lokasi &amp; Tanggal sama dengan Pengajian
                     </label>
                     {sameAsAkad && <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#16a34a' }}>✓ Terhubung otomatis</span>}
                   </div>
                 )}
+
+                <DateField 
+                  label="Tanggal Acara (Hari, Tanggal Bulan Tahun)" 
+                  value={sameAsAkad ? content.holyMatrimony.date : content.weddingReception.date} 
+                  onChange={(v) => !sameAsAkad && updateNested('weddingReception', 'date', v)} 
+                  placeholder="Contoh: Kamis, 24 September 2026"
+                  disabled={sameAsAkad}
+                />
+                <Field label="Waktu" value={content.weddingReception.time} onChange={(v) => updateNested('weddingReception', 'time', v)} placeholder="15:00" />
 
                 {/* Nama Tempat - disabled kalau sameAsAkad */}
                 <div style={{ opacity: sameAsAkad ? 0.5 : 1 }}>
@@ -589,22 +664,64 @@ export default function ContentCms() {
       )
     }
 
-    if (activeTab === 'countdown') return (
-      <div className="cms-repeat-list">
-        <article className="cms-repeat-item">
-          <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <strong>Countdown & Tanggal Acara</strong>
-            <Toggle label="Aktifkan" checked={content.sectionVisibility?.countdown ?? true} onChange={(v) => updateNested('sectionVisibility', 'countdown', v)} />
-          </div>
-          {(content.sectionVisibility?.countdown ?? true) && (
-            <p className="cms-helper-text" style={{ marginTop: '8px', color: '#666', fontSize: '13px' }}>Tanggal acara diatur di tab <strong>Umum &amp; Tanggal</strong>. Section ini akan otomatis menampilkan countdown dan tombol Save the Date ke Google Calendar.</p>
-          )}
-          <div className="cms-fields-grid" style={{ marginTop: '12px' }}>
-            <Field label="Nama Pasangan (untuk Google Calendar)" value={content.coupleNames} onChange={(v) => update('coupleNames', v)} />
-          </div>
-        </article>
-      </div>
-    )
+    if (activeTab === 'countdown') {
+      const datetimeLocalValue = content.eventDate ? content.eventDate.slice(0, 16) : '';
+      let displayReadable = '';
+      if (content.eventDate) {
+        try {
+          const d = new Date(content.eventDate.replace(' ', 'T'));
+          if (!isNaN(d.getTime())) {
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            displayReadable = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} pukul ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} WIB`;
+          }
+        } catch (e) {}
+      }
+
+      return (
+        <div className="cms-repeat-list">
+          <article className="cms-repeat-item">
+            <div className="cms-repeat-head" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <strong>Countdown & Tanggal Acara</strong>
+              <Toggle label="Aktifkan" checked={content.sectionVisibility?.countdown ?? true} onChange={(v) => updateNested('sectionVisibility', 'countdown', v)} />
+            </div>
+
+            <div className="cms-fields-grid" style={{ marginTop: '16px' }}>
+              <div className="cms-field" style={{ gridColumn: '1 / -1' }}>
+                <span style={{ fontWeight: 600, color: '#374151', marginBottom: '6px' }}>Tanggal &amp; Waktu Countdown (Target Acara)</span>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input 
+                    type="datetime-local" 
+                    className="input-field" 
+                    value={datetimeLocalValue} 
+                    onChange={(e) => update('eventDate', e.target.value ? e.target.value + ':00' : '')}
+                    style={{ maxWidth: '280px', padding: '8px 12px' }}
+                  />
+                  <input 
+                    type="text" 
+                    className="input-field" 
+                    value={content.eventDate ?? ''} 
+                    onChange={(e) => update('eventDate', e.target.value)}
+                    placeholder="Format ISO: 2026-09-24T00:00:00"
+                    style={{ flex: 1, minWidth: '220px' }}
+                  />
+                </div>
+                {displayReadable && (
+                  <p style={{ margin: '8px 0 0 0', fontSize: '13px', color: '#16a34a', fontWeight: 500 }}>
+                    📅 Terhitung menuju: <strong>{displayReadable}</strong>
+                  </p>
+                )}
+                <p className="cms-helper-text" style={{ marginTop: '6px', color: '#666', fontSize: '12px' }}>
+                  Pilih tanggal &amp; jam dari kalender atau masukkan format ISO. Nilai ini akan otomatis menggerakkan hitung mundur di undangan.
+                </p>
+              </div>
+
+              <Field label="Nama Pasangan (untuk Google Calendar)" value={content.coupleNames} onChange={(v) => update('coupleNames', v)} />
+            </div>
+          </article>
+        </div>
+      );
+    }
 
     if (activeTab === 'lainnya') return (
       <div className="cms-repeat-list">

@@ -200,6 +200,11 @@ export default function WeddingScreen({ name, config, onOpenInvitation, isProcee
                       {config.holyMatrimony?.enabled && (
                         <div className="mb-6 p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm shadow-lg">
                           <h3 className="font-dancingscript text-3xl mb-2">{config.holyMatrimony.title}</h3>
+                          {config.holyMatrimony.date && (
+                            <p className="text-base font-semibold text-white/95 mb-1 font-legan tracking-wide">
+                              {config.holyMatrimony.date}
+                            </p>
+                          )}
                           <p className="text-sm text-white/90 mb-2">Pukul {config.holyMatrimony.time} WIB - Selesai</p>
                           <p className="text-lg font-bold mb-1">{config.holyMatrimony.place}</p>
                           <p className="text-sm text-white/70 mb-4">{config.holyMatrimony.place_details}</p>
@@ -211,6 +216,11 @@ export default function WeddingScreen({ name, config, onOpenInvitation, isProcee
                       {config.weddingReception?.enabled && (
                         <div className="p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm shadow-lg">
                           <h3 className="font-dancingscript text-3xl mb-2">{config.weddingReception.title}</h3>
+                          {config.weddingReception.date && (
+                            <p className="text-base font-semibold text-white/95 mb-1 font-legan tracking-wide">
+                              {config.weddingReception.date}
+                            </p>
+                          )}
                           <p className="text-sm text-white/90 mb-2">Pukul {config.weddingReception.time} WIB - Selesai</p>
                           <p className="text-lg font-bold mb-1">{config.weddingReception.place}</p>
                           <p className="text-sm text-white/70 mb-4">{config.weddingReception.place_details}</p>

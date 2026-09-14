@@ -48,7 +48,7 @@ export function QrPrelude({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="invitation-panel-overlay fixed inset-0 z-[60] overflow-hidden bg-black"
+          className="invitation-panel-overlay fixed inset-0 z-[1000] h-screen h-[100dvh] max-h-[100dvh] overflow-hidden bg-black"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -67,20 +67,20 @@ export function QrPrelude({
           />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,.1),rgba(0,0,0,.9)_72%)]" />
 
-          <div className="relative z-10 flex min-h-full items-center justify-center px-5 py-8 text-center">
+          <div className="relative z-10 flex h-full min-h-0 items-center justify-center px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] text-center">
             <motion.div
-              className="w-full max-w-sm rounded-xl border border-white/20 bg-black/80 px-6 py-7 shadow-2xl shadow-black backdrop-blur-md"
+              className="flex max-h-full w-full max-w-sm flex-col items-center overflow-hidden rounded-xl border border-white/20 bg-black/80 px-[clamp(1rem,4vw,1.5rem)] py-[clamp(0.75rem,2dvh,1.75rem)] shadow-2xl shadow-black backdrop-blur-md"
               initial={{ y: 28, opacity: 0, scale: .96 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               transition={{ delay: .12, duration: .65 }}
             >
-              <div className="font-legan flex items-center justify-center gap-3 text-white/80 text-xs tracking-widest uppercase">
+              <div className="font-legan flex shrink-0 items-center justify-center gap-3 text-[clamp(0.625rem,1.5dvh,0.75rem)] uppercase tracking-widest text-white/80">
                 <span className="h-px w-8 bg-white/40" /> Check-in <span className="h-px w-8 bg-white/40" />
               </div>
-              <h1 className="font-ovo mt-4 text-3xl text-white">Simpan QR Tamu</h1>
-              <p className="mt-2 text-sm text-[#CCCCCC] font-legan">Tunjukkan QR ini kepada petugas saat tiba di lokasi.</p>
+              <h1 className="font-ovo mt-[clamp(0.35rem,1.2dvh,1rem)] shrink-0 text-[clamp(1.5rem,4dvh,1.875rem)] leading-tight text-white">Simpan QR Tamu</h1>
+              <p className="font-legan mt-[clamp(0.25rem,0.8dvh,0.5rem)] max-w-xs shrink-0 text-[clamp(0.7rem,1.8dvh,0.875rem)] leading-snug text-[#CCCCCC]">Tunjukkan QR ini kepada petugas saat tiba di lokasi.</p>
 
-              <div className="mx-auto my-6 flex aspect-square w-[min(72vw,270px)] items-center justify-center rounded-lg bg-white p-3 shadow-lg">
+              <div className="mx-auto my-[clamp(0.6rem,1.8dvh,1.5rem)] flex aspect-square w-[min(68vw,32dvh,270px)] shrink-0 items-center justify-center rounded-lg bg-white p-[clamp(0.4rem,1.4dvh,0.75rem)] shadow-lg">
                 {qrCode ? (
                   <Image src={qrCode} alt={`QR check-in ${guest.name}`} width={720} height={720} unoptimized className="h-full w-full" />
                 ) : (
@@ -88,21 +88,21 @@ export function QrPrelude({
                 )}
               </div>
 
-              <p className="font-ovo text-2xl text-white">{guest.name}</p>
-              {guest.address && <p className="mt-1 text-xs text-[#CCCCCC] font-legan">{guest.address}</p>}
+              <p className="font-ovo w-full shrink-0 truncate text-[clamp(1.2rem,3dvh,1.5rem)] leading-tight text-white">{guest.name}</p>
+              {guest.address && <p className="font-legan mt-[clamp(0.1rem,0.4dvh,0.25rem)] w-full shrink-0 truncate text-[clamp(0.625rem,1.5dvh,0.75rem)] text-[#CCCCCC]">{guest.address}</p>}
 
               <button
                 type="button"
                 onClick={saveQr}
                 disabled={!qrCode}
-                className="font-legan mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white px-5 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-white/10 disabled:opacity-40"
+                className="font-legan mt-[clamp(0.5rem,1.4dvh,1.5rem)] inline-flex min-h-[clamp(2.25rem,5dvh,2.75rem)] w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white px-4 text-[clamp(0.6rem,1.5dvh,0.75rem)] font-semibold uppercase tracking-widest text-white transition hover:bg-white/10 disabled:opacity-40"
               >
                 <Download size={16} /> Save QR untuk check-in
               </button>
               <button
                 type="button"
                 onClick={onContinue}
-                className="font-legan mt-3 min-h-11 w-full rounded-full bg-white px-5 text-xs font-semibold uppercase tracking-widest text-black transition hover:bg-gray-200"
+                className="font-legan mt-[clamp(0.4rem,1dvh,0.75rem)] min-h-[clamp(2.25rem,5dvh,2.75rem)] w-full shrink-0 whitespace-nowrap rounded-full bg-white px-4 text-[clamp(0.6rem,1.5dvh,0.75rem)] font-semibold uppercase tracking-widest text-black transition hover:bg-gray-200"
               >
                 Tap untuk lanjut <span aria-hidden="true">→</span>
               </button>

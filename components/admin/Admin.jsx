@@ -80,6 +80,7 @@ function Admin() {
   // Search and Pagination states
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [invitationSort, setInvitationSort] = useState(null)
   const ITEMS_PER_PAGE = 20
 
   // Filter guests based on search query
@@ -92,14 +93,33 @@ function Admin() {
     return name.includes(query) || address.includes(query) || contactNumber.includes(query) || from.includes(query)
   })
 
+  const sortedGuests = invitationSort
+    ? [...filteredGuests].sort((firstGuest, secondGuest) => {
+        const firstSent = firstGuest.invitation_status === 'sent' ? 1 : 0
+        const secondSent = secondGuest.invitation_status === 'sent' ? 1 : 0
+        return invitationSort === 'sent-first'
+          ? secondSent - firstSent
+          : firstSent - secondSent
+      })
+    : filteredGuests
+
   // Calculate pagination details
-  const totalPages = Math.ceil(filteredGuests.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(sortedGuests.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const paginatedGuests = filteredGuests.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  const paginatedGuests = sortedGuests.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
   // Reset page to 1 when search query changes
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value)
+    setCurrentPage(1)
+  }
+
+  const toggleInvitationSort = () => {
+    setInvitationSort(current => {
+      if (current === 'sent-first') return 'unsent-first'
+      if (current === 'unsent-first') return null
+      return 'sent-first'
+    })
     setCurrentPage(1)
   }
 
@@ -959,7 +979,7 @@ function Admin() {
       {/* Main Content */}
       <div className="admin-main-content">
         {/* Stats */}
-        <div style={{
+        <div className="admin-stats-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: 'var(--spacing-md)',
@@ -1034,7 +1054,7 @@ function Admin() {
         </div>
 
         {/* Search & Actions */}
-        <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
+        <div className="card admin-search-card" style={{ marginBottom: 'var(--spacing-lg)' }}>
           <div style={{
             display: 'flex',
             gap: 'var(--spacing-sm)',
@@ -1111,7 +1131,7 @@ function Admin() {
         )}
 
         {/* Guest Table */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="card admin-table-card" style={{ padding: 0, overflow: 'hidden' }}>
           {loading ? (
             <div style={{
               padding: 'var(--spacing-xxl)',
@@ -1156,16 +1176,16 @@ function Admin() {
               <table className="admin-guest-table">
                 <colgroup>
                   <col style={{ width: '3%' }} />
-                  <col style={{ width: '9%' }} />
                   <col style={{ width: '10%' }} />
-                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '10%' }} />
+                  <col style={{ width: '10%' }} />
+                  <col style={{ width: '6%' }} />
+                  <col style={{ width: '8%' }} />
                   <col style={{ width: '7%' }} />
-                  <col style={{ width: '9%' }} />
-                  <col style={{ width: '10%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '9%' }} />
-                  <col style={{ width: '10%' }} />
-                  <col style={{ width: '15%' }} />
+                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '19%' }} />
                   <col style={{ width: '4%' }} />
                 </colgroup>
                 <thead>
@@ -1178,7 +1198,26 @@ function Admin() {
                     <th>Status</th>
                     <th>Check-in</th>
                     <th>QR</th>
-                    <th>Status Terkirim</th>
+                    <th aria-sort={invitationSort === 'sent-first'
+                      ? 'descending'
+                      : invitationSort === 'unsent-first'
+                        ? 'ascending'
+                        : 'none'}>
+                      <button
+                        type="button"
+                        className="admin-sort-button"
+                        data-sort={invitationSort || 'none'}
+                        onClick={toggleInvitationSort}
+                        title={invitationSort === 'sent-first'
+                          ? 'Urutkan yang belum terkirim lebih dulu'
+                          : invitationSort === 'unsent-first'
+                            ? 'Matikan pengurutan status terkirim'
+                            : 'Urutkan yang sudah terkirim lebih dulu'}
+                      >
+                        Status Terkirim
+                        <span className="admin-sort-indicator" aria-hidden="true" />
+                      </button>
+                    </th>
                     <th>Terkirim Kapan</th>
                     <th>Aksi Undangan</th>
                     <th></th>
@@ -1290,7 +1329,7 @@ function Admin() {
                           )}
                         </td>
                         <td data-label="Aksi Undangan">
-                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          <div className="admin-invitation-actions">
                             {canOpenInvitation && (
                               <a
                                 className="btn-pearl-capsule"

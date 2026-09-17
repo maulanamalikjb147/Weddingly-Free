@@ -14,12 +14,16 @@ type InvitationGuest = {
   alamat_tamu: string | null
   contact_number: string | null
   tamu_from: string | null
+  batch: string | null
   invitation_slug: string | null
 }
 
 const jobsGlobal = globalThis as JobsGlobal
 const activeJobs = jobsGlobal.__weddinglyWhatsAppJobs || new Map<string, ActiveJob>()
 jobsGlobal.__weddinglyWhatsAppJobs = activeJobs
+
+const broadcastBatches = ['batch-1', 'batch-2', 'batch-3'] as const
+type BroadcastBatch = typeof broadcastBatches[number]
 
 const invitationBaseUrl = (process.env.NEXT_PUBLIC_INVITATION_BASE_URL || 'https://anisa.maulanamalik.my.id').replace(/\/$/, '')
 const terminalStatuses = ['completed', 'failed', 'cancelled']
@@ -137,7 +141,7 @@ async function runBulkJob(db: WhatsAppDbClient, batchId: string) {
     const guestIds = (items || []).map((item) => item.guest_id).filter(Boolean)
     const { data: guests, error: guestError } = guestIds.length > 0
       ? await db.from(SUPABASE_TABLES.dataTamu)
-        .select('id, nama_tamu, alamat_tamu, contact_number, tamu_from, invitation_slug')
+        .select('id, nama_tamu, alamat_tamu, contact_number, tamu_from, batch, invitation_slug')
         .in('id', guestIds)
       : { data: [], error: null }
     if (guestError) throw guestError
@@ -287,13 +291,18 @@ export async function startWhatsAppBulkJob(db: WhatsAppDbClient, userId: string,
   tamuFrom?: string
   delaySeconds?: number
   randomizeDelay?: boolean
+  broadcastBatch?: string | null
 }) {
   const tamuFrom = String(input.tamuFrom || '').trim()
   const delaySeconds = Number(input.delaySeconds || 10)
   const randomizeDelay = Boolean(input.randomizeDelay)
+  const broadcastBatch = input.broadcastBatch ? String(input.broadcastBatch).trim() : null
   if (!tamuFrom) throw new Error('Pilih akun pengirim')
   if (!Number.isInteger(delaySeconds) || delaySeconds < 5 || delaySeconds > 60) {
     throw new Error('Jeda pengiriman harus 5 sampai 60 detik')
+  }
+  if (broadcastBatch && !broadcastBatches.includes(broadcastBatch as BroadcastBatch)) {
+    throw new Error('Batch broadcast tidak valid')
   }
 
   const { sessionId } = await connectedWhatsAppSocket(db, tamuFrom)
@@ -307,6 +316,15 @@ export async function startWhatsAppBulkJob(db: WhatsAppDbClient, userId: string,
     .maybeSingle()
   if (activeBatch) throw new Error(`Masih ada pengiriman ${tamuFrom} yang berjalan`)
 
+  let candidateQuery = db.from(SUPABASE_TABLES.dataTamu)
+    .select('id, nama_tamu, alamat_tamu, contact_number, tamu_from, batch, invitation_slug')
+    .ilike('tamu_from', tamuFrom)
+    .in('invitation_status', ['not_sent', 'failed'])
+    .not('contact_number', 'is', null)
+    .order('id')
+
+  if (broadcastBatch) candidateQuery = candidateQuery.eq('batch', broadcastBatch)
+
   const [{ data: source, error: sourceError }, { data: template, error: templateError }, { data: candidates, error: candidateError }] = await Promise.all([
     db.from(SUPABASE_TABLES.configTamuDari).select('name').ilike('name', tamuFrom).limit(1).maybeSingle(),
     db.from(SUPABASE_TABLES.invitationMessageTemplates)
@@ -314,12 +332,7 @@ export async function startWhatsAppBulkJob(db: WhatsAppDbClient, userId: string,
       .eq('tamu_from', tamuFrom)
       .eq('is_active', true)
       .maybeSingle(),
-    db.from(SUPABASE_TABLES.dataTamu)
-      .select('id, nama_tamu, alamat_tamu, contact_number, tamu_from, invitation_slug')
-      .ilike('tamu_from', tamuFrom)
-      .in('invitation_status', ['not_sent', 'failed'])
-      .not('contact_number', 'is', null)
-      .order('id'),
+    candidateQuery,
   ])
   if (sourceError || !source) throw sourceError || new Error(`Pengirim ${tamuFrom} tidak ditemukan`)
   if (templateError || !template?.message_template) throw templateError || new Error(`Template pesan ${tamuFrom} belum aktif`)
@@ -351,7 +364,8 @@ export async function startWhatsAppBulkJob(db: WhatsAppDbClient, userId: string,
       randomize_delay: randomizeDelay,
       provider: 'baileys',
       session_id: sessionId,
-      raw_status: { engine: 'baileys', skippedGuests },
+      broadcast_batch: broadcastBatch,
+      raw_status: { engine: 'baileys', skippedGuests, broadcastBatch },
       created_by: userId,
     })
     .select('id')
@@ -391,9 +405,10 @@ export async function startWhatsAppBulkJob(db: WhatsAppDbClient, userId: string,
     }).eq('name', source.name),
   ])
 
-  await addLog(db, batch.id, 'info', 'job_queued', `${validGuests.length} pesan masuk antrean ${source.name}`, null, {
+  await addLog(db, batch.id, 'info', 'job_queued', `${validGuests.length} pesan masuk antrean ${source.name}${broadcastBatch ? ` untuk ${broadcastBatch}` : ''}`, null, {
     delaySeconds,
     randomizeDelay,
+    broadcastBatch,
     skippedGuests,
   })
   void runBulkJob(db, batch.id)
@@ -404,7 +419,7 @@ export async function startWhatsAppBulkJob(db: WhatsAppDbClient, userId: string,
 export async function sendSingleWhatsAppInvitation(db: WhatsAppDbClient, guestId: number) {
   const { data: guest, error: guestError } = await db
     .from(SUPABASE_TABLES.dataTamu)
-    .select('id, nama_tamu, alamat_tamu, contact_number, tamu_from, invitation_slug')
+    .select('id, nama_tamu, alamat_tamu, contact_number, tamu_from, batch, invitation_slug')
     .eq('id', guestId)
     .maybeSingle()
   if (guestError || !guest) throw guestError || new Error('Tamu tidak ditemukan')

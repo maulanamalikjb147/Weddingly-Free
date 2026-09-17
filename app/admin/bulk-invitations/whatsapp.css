@@ -360,7 +360,21 @@
 }
 
 .wa-select-wrap select:focus { border-color: #3f8d58; box-shadow: 0 0 0 3px rgba(63, 141, 88, .12); }
+.wa-select-wrap select:disabled { color: #899188; background: #f4f6f3; cursor: not-allowed; }
 .wa-select-wrap svg { position: absolute; right: 12px; top: 12px; pointer-events: none; color: #697269; }
+
+.wa-broadcast-box {
+  margin-top: 14px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid #e0e5df;
+  border-radius: 6px;
+  background: #f8faf8;
+}
+
+.wa-broadcast-box .wa-toggle-row { margin-top: 0; }
+.wa-broadcast-box small { color: #747d74; font-size: 10px; }
 
 .wa-segmented {
   width: 100%;

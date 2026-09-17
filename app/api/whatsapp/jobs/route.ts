@@ -34,6 +34,7 @@ export async function POST(request: Request) {
         tamuFrom: body.tamuFrom,
         delaySeconds: body.delaySeconds,
         randomizeDelay: body.randomizeDelay,
+        broadcastBatch: body.broadcastBatch,
       })
       return NextResponse.json(result, { status: 202 })
     }

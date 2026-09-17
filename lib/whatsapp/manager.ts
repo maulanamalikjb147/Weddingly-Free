@@ -42,6 +42,7 @@ runtimeGlobal.__weddinglyWhatsAppSessions = runtimes
 const logger = pino({ level: process.env.WHATSAPP_LOG_LEVEL || 'silent' })
 const shouldAutoRestoreSessions = process.env.WHATSAPP_AUTO_RESTORE === 'true'
   || (process.env.WHATSAPP_AUTO_RESTORE !== 'false' && !process.env.NETLIFY && !process.env.VERCEL)
+const broadcastBatches = ['batch-1', 'batch-2', 'batch-3'] as const
 
 const sessionIdFor = (value: string) => value
   .trim()
@@ -318,7 +319,7 @@ export async function listWhatsAppSessions(db: WhatsAppDbClient) {
 
   const { data: guests, error: guestError } = await db
     .from(SUPABASE_TABLES.dataTamu)
-    .select('tamu_from, contact_number, invitation_status')
+    .select('tamu_from, batch, contact_number, invitation_status')
     .not('contact_number', 'is', null)
   if (guestError) throw guestError
 
@@ -329,10 +330,16 @@ export async function listWhatsAppSessions(db: WhatsAppDbClient) {
     const runtime = runtimeForSource(source.name)
     const stored = sessionsBySource.get(source.name.toLowerCase())
     const sessionId = source.whatsapp_session_id || stored?.id || sessionIdFor(source.name)
-    const eligibleCount = (guests || []).filter((guest) => (
+    const eligibleGuests = (guests || []).filter((guest) => (
       guest.tamu_from?.toLowerCase() === source.name.toLowerCase()
       && ['not_sent', 'failed'].includes(guest.invitation_status)
-    )).length
+    ))
+    const eligibleByBatch = Object.fromEntries(
+      broadcastBatches.map((batch) => [
+        batch,
+        eligibleGuests.filter((guest) => (guest.batch || 'batch-1') === batch).length,
+      ]),
+    )
 
     if (shouldAutoRestoreSessions && !runtime && source.whatsapp_enabled && savedSessions.has(sessionId)) {
       void connectWhatsAppSession(db, source.name).catch(() => undefined)
@@ -348,7 +355,8 @@ export async function listWhatsAppSessions(db: WhatsAppDbClient) {
       lastError: runtime?.lastError || stored?.last_error || null,
       connected: runtime?.status === 'connected',
       sessionSaved: savedSessions.has(sessionId),
-      eligibleCount,
+      eligibleCount: eligibleGuests.length,
+      eligibleByBatch,
       delaySeconds: source.bulk_delay_seconds || 10,
       randomizeDelay: Boolean(source.bulk_randomize_delay),
       connectedAt: stored?.connected_at || source.whatsapp_connected_at || null,

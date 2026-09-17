@@ -18,12 +18,17 @@ const INVITATION_BASE_URL = (
   'https://anisa.maulanamalik.my.id'
 ).replace(/\/$/, '')
 const searchableText = (value) => String(value ?? '').toLowerCase()
+const BATCH_OPTIONS = ['batch-1', 'batch-2', 'batch-3']
+const normalizeBatch = (value) => {
+  const batch = String(value ?? '').trim().toLowerCase()
+  return BATCH_OPTIONS.includes(batch) ? batch : ''
+}
 
 function Admin() {
   const [guests, setGuests] = useState([])
   const [configTamuDari, setConfigTamuDari] = useState([])
   const [showAddModal, setShowAddModal] = useState(false)
-  const [newGuest, setNewGuest] = useState({ nama_tamu: '', alamat_tamu: '', contact_number: '', tamu_from: '' })
+  const [newGuest, setNewGuest] = useState({ nama_tamu: '', alamat_tamu: '', contact_number: '', tamu_from: '', batch: 'batch-1' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
@@ -84,8 +89,9 @@ function Admin() {
     const address = searchableText(guest.alamat_tamu)
     const contactNumber = searchableText(guest.contact_number)
     const from = searchableText(guest.tamu_from)
+    const batch = searchableText(guest.batch)
     const query = searchableText(searchQuery)
-    return name.includes(query) || address.includes(query) || contactNumber.includes(query) || from.includes(query)
+    return name.includes(query) || address.includes(query) || contactNumber.includes(query) || from.includes(query) || batch.includes(query)
   })
 
   // Calculate pagination details
@@ -295,6 +301,7 @@ function Admin() {
           alamat_tamu: newGuest.alamat_tamu,
           contact_number: newGuest.contact_number || null,
           tamu_from: newGuest.tamu_from || null,
+          batch: normalizeBatch(newGuest.batch) || 'batch-1',
           hadir: null,
           is_generated: false,
           signed_by: null
@@ -302,7 +309,7 @@ function Admin() {
 
       if (error) throw error
 
-      setNewGuest({ nama_tamu: '', alamat_tamu: '', contact_number: '', tamu_from: '' })
+      setNewGuest({ nama_tamu: '', alamat_tamu: '', contact_number: '', tamu_from: '', batch: 'batch-1' })
       setShowAddModal(false)
       setSuccess('Tamu berhasil ditambahkan!')
       await fetchGuests()
@@ -460,7 +467,7 @@ function Admin() {
     try {
       setLoadingTemplate(true)
       const selectedVal = selectedBulkFrom || ''
-      const csvContent = `sep=;\nNama tamu;Alamat;Contact Number;Tamu dari\nJohn Doe;Jl. Kebon Jeruk No. 12;6281234567890;${selectedVal}\n`
+      const csvContent = `sep=;\nNama tamu;Alamat;Contact Number;Tamu dari;Batch\nJohn Doe;Jl. Kebon Jeruk No. 12;6281234567890;${selectedVal};batch-1\n`
       const fileName = `${QR_PREFIX}/template/template.csv`
       const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
       const { error: uploadError } = await supabase.storage
@@ -544,8 +551,10 @@ function Admin() {
         const addressIndex = indexOfHeader('Alamat', 'alamat_tamu')
         const contactIndex = indexOfHeader('Contact Number', 'Concat Number', 'Contact', 'Nomor Kontak', 'No HP', 'No Handphone', 'Telepon', 'Phone')
         const fromIndex = indexOfHeader('Tamu dari', 'tamu_from', 'Dari')
+        const batchIndex = indexOfHeader('Batch', 'broadcast batch', 'broadcast_batch')
 
         const parsedGuests = []
+        const invalidBatchRows = []
         for (let i = startIndex; i < activeLines.length; i++) {
           const columns = activeLines[i].split(delimiter).map(col => col.trim())
           const nama_tamu = columns[nameIndex >= 0 ? nameIndex : 0] || ''
@@ -556,12 +565,19 @@ function Admin() {
               colIndex !== nameIndex &&
               colIndex !== addressIndex &&
               colIndex !== fromIndex &&
+              colIndex !== batchIndex &&
               looksLikeContactNumber(col)
             ))
           const contact_number = contactColumnIndex >= 0 ? normalizeContactNumber(columns[contactColumnIndex]) : ''
           let tamu_from = columns[fromIndex >= 0 ? fromIndex : 3] || ''
+          const rawBatch = columns[batchIndex >= 0 ? batchIndex : 4] || ''
+          const batch = rawBatch ? normalizeBatch(rawBatch) : 'batch-1'
 
           if (!nama_tamu) continue
+          if (!batch) {
+            invalidBatchRows.push(i + 1)
+            continue
+          }
 
           if (!tamu_from && selectedBulkFrom) {
             tamu_from = selectedBulkFrom
@@ -572,13 +588,17 @@ function Admin() {
             alamat_tamu,
             contact_number: contact_number || null,
             tamu_from: tamu_from || null,
+            batch,
             hadir: null,
             is_generated: false,
             signed_by: null
           })
         }
 
-        if (parsedGuests.length === 0) {
+        if (invalidBatchRows.length > 0) {
+          setBulkGuests([])
+          setBulkError(`Batch hanya boleh batch-1, batch-2, atau batch-3. Cek baris: ${invalidBatchRows.join(', ')}.`)
+        } else if (parsedGuests.length === 0) {
           setBulkError('Tidak ada tamu valid yang ditemukan di file CSV.')
         } else {
           setBulkGuests(parsedGuests)
@@ -956,7 +976,7 @@ function Admin() {
       {/* Main Content */}
       <div className="admin-main-content">
         {/* Stats */}
-        <div style={{
+        <div className="admin-stats-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: 'var(--spacing-md)',
@@ -1031,7 +1051,7 @@ function Admin() {
         </div>
 
         {/* Search & Actions */}
-        <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
+        <div className="card admin-search-card" style={{ marginBottom: 'var(--spacing-lg)' }}>
           <div style={{
             display: 'flex',
             gap: 'var(--spacing-sm)',
@@ -1043,7 +1063,7 @@ function Admin() {
                 className="input-field"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                placeholder="Cari nama tamu, alamat, atau nomor kontak..."
+                placeholder="Cari nama tamu, alamat, nomor kontak, atau batch..."
                 style={{ paddingLeft: '40px' }}
               />
               <span style={{
@@ -1108,7 +1128,7 @@ function Admin() {
         )}
 
         {/* Guest Table */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="card admin-table-card" style={{ padding: 0, overflow: 'hidden' }}>
           {loading ? (
             <div style={{
               padding: 'var(--spacing-xxl)',
@@ -1153,16 +1173,17 @@ function Admin() {
               <table className="admin-guest-table">
                 <colgroup>
                   <col style={{ width: '3%' }} />
-                  <col style={{ width: '9%' }} />
                   <col style={{ width: '10%' }} />
-                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '10%' }} />
+                  <col style={{ width: '10%' }} />
+                  <col style={{ width: '6%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '8%' }} />
                   <col style={{ width: '7%' }} />
-                  <col style={{ width: '9%' }} />
-                  <col style={{ width: '10%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '9%' }} />
-                  <col style={{ width: '10%' }} />
-                  <col style={{ width: '15%' }} />
+                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '14%' }} />
                   <col style={{ width: '4%' }} />
                 </colgroup>
                 <thead>
@@ -1172,6 +1193,7 @@ function Admin() {
                     <th>Alamat</th>
                     <th>Contact Number</th>
                     <th>Tamu dari</th>
+                    <th>Batch</th>
                     <th>Status</th>
                     <th>Check-in</th>
                     <th>QR</th>
@@ -1211,6 +1233,9 @@ function Admin() {
                         </td>
                         <td data-label="Tamu dari" className="text-caption">
                           {guest.tamu_from || '-'}
+                        </td>
+                        <td data-label="Batch" className="text-caption">
+                          {guest.batch || 'batch-1'}
                         </td>
                         <td data-label="Status">
                           <select
@@ -1291,7 +1316,7 @@ function Admin() {
                           )}
                         </td>
                         <td data-label="Aksi Undangan">
-                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          <div className="admin-invitation-actions">
                             {canOpenInvitation && (
                               <a
                                 className="btn-pearl-capsule"
@@ -1548,6 +1573,34 @@ function Admin() {
                 </select>
               </div>
 
+              <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+                <label className="text-caption-strong" style={{
+                  display: 'block',
+                  marginBottom: 'var(--spacing-xs)',
+                  color: 'var(--color-ink)'
+                }}>
+                  Batch
+                </label>
+                <select
+                  className="input-field"
+                  value={newGuest.batch}
+                  onChange={(e) => setNewGuest({ ...newGuest, batch: e.target.value })}
+                  style={{
+                    appearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a7a7a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 14px center',
+                    paddingRight: '36px'
+                  }}
+                >
+                  {BATCH_OPTIONS.map((batch) => (
+                    <option key={batch} value={batch}>
+                      {batch}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
                 <button
                   type="button"
@@ -1744,6 +1797,7 @@ function Admin() {
                           <th style={{ padding: '6px 12px' }}>Alamat</th>
                           <th style={{ padding: '6px 12px' }}>Contact Number</th>
                           <th style={{ padding: '6px 12px' }}>Dari</th>
+                          <th style={{ padding: '6px 12px' }}>Batch</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1755,6 +1809,11 @@ function Admin() {
                             <td style={{ padding: '6px 12px' }}>
                               <span className="badge badge-success" style={{ fontSize: '10px', padding: '2px 8px' }}>
                                 {bg.tamu_from || '-'}
+                              </span>
+                            </td>
+                            <td style={{ padding: '6px 12px' }}>
+                              <span className="badge badge-pending" style={{ fontSize: '10px', padding: '2px 8px' }}>
+                                {bg.batch}
                               </span>
                             </td>
                           </tr>

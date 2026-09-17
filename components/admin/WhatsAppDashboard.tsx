@@ -37,6 +37,7 @@ type SessionStatus = {
   connected: boolean
   sessionSaved: boolean
   eligibleCount: number
+  eligibleByBatch?: Record<string, number>
   delaySeconds: number
   randomizeDelay: boolean
   connectedAt: string | null
@@ -53,6 +54,7 @@ type Batch = {
   cancelled_count: number
   delay_seconds: number
   randomize_delay: boolean
+  broadcast_batch: string | null
   error: string | null
   created_at: string
   completed_at: string | null
@@ -84,6 +86,7 @@ type JobsPayload = {
 
 const emptyJobs: JobsPayload = { batches: [], selectedBatch: null, items: [], logs: [] }
 const activeStatuses = ['creating', 'pending', 'processing']
+const broadcastBatches = ['batch-1', 'batch-2', 'batch-3']
 
 const statusCopy: Record<string, string> = {
   disconnected: 'Belum tersambung',
@@ -132,6 +135,8 @@ export default function WhatsAppDashboard() {
   const [jobs, setJobs] = useState<JobsPayload>(emptyJobs)
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null)
   const [selectedSender, setSelectedSender] = useState('')
+  const [broadcastEnabled, setBroadcastEnabled] = useState(false)
+  const [selectedBroadcastBatch, setSelectedBroadcastBatch] = useState('batch-1')
   const [delaySeconds, setDelaySeconds] = useState(10)
   const [randomizeDelay, setRandomizeDelay] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -189,6 +194,9 @@ export default function WhatsAppDashboard() {
     () => sessions.find((session) => session.tamuFrom === selectedSender) || null,
     [selectedSender, sessions],
   )
+  const selectedRecipientCount = broadcastEnabled
+    ? selectedSession?.eligibleByBatch?.[selectedBroadcastBatch] || 0
+    : selectedSession?.eligibleCount || 0
   const qrSession = useMemo(
     () => sessions.find((session) => session.tamuFrom === qrSender) || null,
     [qrSender, sessions],
@@ -247,11 +255,12 @@ export default function WhatsAppDashboard() {
           tamuFrom: selectedSender,
           delaySeconds,
           randomizeDelay,
+          broadcastBatch: broadcastEnabled ? selectedBroadcastBatch : null,
         }),
       })
       setSelectedBatchId(result.batchId)
       setConfirmSend(false)
-      setSuccess(`${result.totalMessages} pesan masuk antrean ${selectedSender}`)
+      setSuccess(`${result.totalMessages} pesan masuk antrean ${selectedSender}${broadcastEnabled ? ` untuk ${selectedBroadcastBatch}` : ''}`)
       await loadDashboard(false)
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : String(requestError))
@@ -395,6 +404,26 @@ export default function WhatsAppDashboard() {
               </div>
             </label>
 
+            <div className="wa-broadcast-box">
+              <label className="wa-toggle-row">
+                <input type="checkbox" checked={broadcastEnabled} onChange={(event) => setBroadcastEnabled(event.target.checked)} />
+                <span className="wa-toggle" aria-hidden="true" />
+                <span>Broadcast to</span>
+              </label>
+              <div className="wa-select-wrap">
+                <select
+                  value={selectedBroadcastBatch}
+                  onChange={(event) => setSelectedBroadcastBatch(event.target.value)}
+                  disabled={!broadcastEnabled}
+                  aria-label="Pilih batch broadcast"
+                >
+                  {broadcastBatches.map((batch) => <option key={batch} value={batch}>{batch}</option>)}
+                </select>
+                <ChevronDown size={16} />
+              </div>
+              <small>{broadcastEnabled ? `${selectedRecipientCount} penerima di ${selectedBroadcastBatch}` : 'Semua batch akan dikirim'}</small>
+            </div>
+
             <fieldset className="wa-field">
               <legend>Jeda per pesan</legend>
               <div className="wa-segmented">
@@ -413,13 +442,13 @@ export default function WhatsAppDashboard() {
             </label>
 
             <div className="wa-send-summary">
-              <div><Users size={17} /><span>Penerima</span><strong>{selectedSession?.eligibleCount || 0}</strong></div>
-              <div><Clock3 size={17} /><span>Estimasi</span><strong>{Math.ceil(((selectedSession?.eligibleCount || 0) * delaySeconds) / 60)} mnt</strong></div>
+              <div><Users size={17} /><span>Penerima</span><strong>{selectedRecipientCount}</strong></div>
+              <div><Clock3 size={17} /><span>Estimasi</span><strong>{Math.ceil((selectedRecipientCount * delaySeconds) / 60)} mnt</strong></div>
             </div>
 
             <button
               className="wa-button wa-button-primary wa-send-button"
-              disabled={!selectedSession?.connected || !selectedSession.eligibleCount || busyAction === 'start-job'}
+              disabled={!selectedSession?.connected || !selectedRecipientCount || busyAction === 'start-job'}
               onClick={() => setConfirmSend(true)}
             >
               <Send size={17} /> Kirim bulk
@@ -450,7 +479,7 @@ export default function WhatsAppDashboard() {
                     <span className={`wa-job-state wa-job-state-${batch.status}`}><StatusIcon status={batch.status} /></span>
                     <span className="wa-job-copy">
                       <strong>{batch.tamu_from}</strong>
-                      <small>{formatDate(batch.created_at)} · {batch.delay_seconds} dtk/pesan</small>
+                      <small>{formatDate(batch.created_at)} · {batch.delay_seconds} dtk/pesan{batch.broadcast_batch ? ` · ${batch.broadcast_batch}` : ''}</small>
                       {isActive && <span className="wa-mini-progress"><i style={{ width: `${batchProgress}%` }} /></span>}
                     </span>
                     <span className="wa-job-numbers"><strong>{batch.sent_count}/{batch.total_messages}</strong><small>{statusCopy[batch.status] || batch.status}</small></span>
@@ -468,7 +497,7 @@ export default function WhatsAppDashboard() {
             <div className="wa-detail-heading">
               <div>
                 <span className={`wa-status wa-status-${jobs.selectedBatch.status}`}><StatusIcon status={jobs.selectedBatch.status} /> {statusCopy[jobs.selectedBatch.status] || jobs.selectedBatch.status}</span>
-                <h2>{jobs.selectedBatch.tamu_from} · {jobs.selectedBatch.total_messages} pesan</h2>
+                <h2>{jobs.selectedBatch.tamu_from} · {jobs.selectedBatch.total_messages} pesan{jobs.selectedBatch.broadcast_batch ? ` · ${jobs.selectedBatch.broadcast_batch}` : ''}</h2>
                 <p>{formatDate(jobs.selectedBatch.created_at)}</p>
               </div>
               {activeStatuses.includes(jobs.selectedBatch.status) && (
@@ -549,11 +578,11 @@ export default function WhatsAppDashboard() {
           <div className="wa-modal wa-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
             <button className="wa-modal-close" onClick={() => setConfirmSend(false)} aria-label="Tutup"><X size={19} /></button>
             <div className="wa-modal-icon"><Send size={24} /></div>
-            <h2 id="confirm-title">Kirim {selectedSession.eligibleCount} undangan?</h2>
-            <p>{selectedSession.tamuFrom} · {delaySeconds} detik per pesan</p>
+            <h2 id="confirm-title">Kirim {selectedRecipientCount} undangan?</h2>
+            <p>{selectedSession.tamuFrom} · {broadcastEnabled ? selectedBroadcastBatch : 'semua batch'} · {delaySeconds} detik per pesan</p>
             <div className="wa-confirm-stats">
               <span><Phone size={17} />+{selectedSession.phoneNumber || '-'}</span>
-              <span><Clock3 size={17} />±{Math.ceil((selectedSession.eligibleCount * delaySeconds) / 60)} menit</span>
+              <span><Clock3 size={17} />±{Math.ceil((selectedRecipientCount * delaySeconds) / 60)} menit</span>
             </div>
             <div className="wa-confirm-actions">
               <button className="wa-button wa-button-secondary" onClick={() => setConfirmSend(false)}>Batal</button>

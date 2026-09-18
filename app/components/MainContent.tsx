@@ -338,21 +338,22 @@ const WeddingScreen = ({ name, config, onOpenInvitation, isProceeded = false }: 
               <>
                 {/* Slide Bride & Groom (Slide 1.5) */}
             <div
-              className={`text-white h-screen flex flex-col justify-center items-center p-5 px-12 snap-start `}
+              className="relative isolate h-screen overflow-hidden flex flex-col justify-center items-center p-5 px-12 snap-start text-white"
               style={{
                 backgroundImage: `url(${config.backgrounds?.bg_bride_groom || "/foto_1_samping.jpg"})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             >
+              <div className="absolute inset-0 z-0 bg-black/30" aria-hidden="true" />
               <div
                 ref={slideBrideGroomRef}
-                className={` ${isSlideBrideGroomInView ? "active" : ""} fadeInMove text-center flex flex-col items-center justify-center`}
+                className={`${isSlideBrideGroomInView ? "active" : ""} invitation-readable-text relative z-10 fadeInMove text-center flex flex-col items-center justify-center max-w-4xl`}
               >
-                <p className="text-base md:text-lg font-legan text-white mb-4">
+                <p className="text-base md:text-lg font-legan font-medium leading-relaxed text-white mb-5">
                   {config.brideGroomGreeting}
                 </p>
-                <p className="text-sm md:text-base font-legan text-[#CCCCCC]">
+                <p className="text-sm md:text-base font-legan font-medium leading-relaxed text-white/95">
                   {config.brideGroomText}
                 </p>
               </div>

@@ -24,6 +24,42 @@ const normalizeBatch = (value) => {
   return BATCH_OPTIONS.includes(batch) ? batch : ''
 }
 
+const SMART_FILTER_FIELDS = {
+  'nama': 'nama_tamu',
+  'nama tamu': 'nama_tamu',
+  'alamat': 'alamat_tamu',
+  'contact': 'contact_number',
+  'contact number': 'contact_number',
+  'nomor kontak': 'contact_number',
+  'tamu dari': 'tamu_from',
+  'batch': 'batch',
+  'status terkirim': 'invitation_status'
+}
+
+const parseSmartFilter = (query) => {
+  const match = String(query ?? '').match(/^\s*([^=]+?)\s*=\s*(.*?)\s*$/)
+  if (!match) return null
+
+  const field = SMART_FILTER_FIELDS[searchableText(match[1]).trim()]
+  if (!field) return null
+  return { field, value: searchableText(match[2]).trim() }
+}
+
+const matchesSmartFilter = (guest, filter) => {
+  if (!filter.value) return true
+
+  if (filter.field === 'invitation_status') {
+    if (filter.value.includes('belum')) return guest.invitation_status !== 'sent'
+    if (filter.value.includes('terkirim')) return guest.invitation_status === 'sent'
+    if (filter.value.includes('diproses')) return guest.invitation_status === 'sending'
+    if (filter.value.includes('gagal')) return guest.invitation_status === 'failed'
+  }
+
+  return searchableText(guest[filter.field]).includes(filter.value)
+}
+
+const uniqueValues = (values) => [...new Set(values.filter(Boolean).map(value => String(value).trim()))]
+
 function Admin() {
   const [guests, setGuests] = useState([])
   const [configTamuDari, setConfigTamuDari] = useState([])
@@ -81,10 +117,34 @@ function Admin() {
   // Search and Pagination states
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [invitationSort, setInvitationSort] = useState(null)
+  const [nameSort, setNameSort] = useState(null)
   const ITEMS_PER_PAGE = 20
+
+  const filterSuggestions = [
+    'Nama Tamu = ',
+    'Alamat = ',
+    'Contact Number = ',
+    'Tamu dari = ',
+    'Batch = ',
+    'Status Terkirim = ',
+    ...uniqueValues(guests.map(guest => guest.nama_tamu)).map(value => `Nama Tamu = ${value}`),
+    ...uniqueValues(guests.map(guest => guest.alamat_tamu)).map(value => `Alamat = ${value}`),
+    ...uniqueValues(guests.map(guest => guest.contact_number)).map(value => `Contact Number = ${value}`),
+    ...uniqueValues([
+      ...configTamuDari.map(item => item.name),
+      ...guests.map(guest => guest.tamu_from)
+    ]).map(value => `Tamu dari = ${value}`),
+    ...BATCH_OPTIONS.map(value => `Batch = ${value}`),
+    'Status Terkirim = Terkirim',
+    'Status Terkirim = Belum terkirim'
+  ]
 
   // Filter guests based on search query
   const filteredGuests = guests.filter(guest => {
+    const smartFilter = parseSmartFilter(searchQuery)
+    if (smartFilter) return matchesSmartFilter(guest, smartFilter)
+
     const name = searchableText(guest.nama_tamu)
     const address = searchableText(guest.alamat_tamu)
     const contactNumber = searchableText(guest.contact_number)
@@ -94,14 +154,55 @@ function Admin() {
     return name.includes(query) || address.includes(query) || contactNumber.includes(query) || from.includes(query) || batch.includes(query)
   })
 
+  const sortedGuests = [...filteredGuests].sort((firstGuest, secondGuest) => {
+    if (nameSort) {
+      const comparison = String(firstGuest.nama_tamu ?? '').localeCompare(
+        String(secondGuest.nama_tamu ?? ''),
+        'id-ID',
+        { sensitivity: 'base' }
+      )
+      return nameSort === 'ascending' ? comparison : -comparison
+    }
+
+    if (invitationSort) {
+      const firstSent = firstGuest.invitation_status === 'sent' ? 1 : 0
+      const secondSent = secondGuest.invitation_status === 'sent' ? 1 : 0
+      return invitationSort === 'sent-first'
+        ? secondSent - firstSent
+        : firstSent - secondSent
+    }
+
+    return 0
+  })
+
   // Calculate pagination details
-  const totalPages = Math.ceil(filteredGuests.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(sortedGuests.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const paginatedGuests = filteredGuests.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  const paginatedGuests = sortedGuests.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
   // Reset page to 1 when search query changes
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value)
+    setCurrentPage(1)
+  }
+
+  const toggleInvitationSort = () => {
+    setInvitationSort(current => {
+      if (current === 'sent-first') return 'unsent-first'
+      if (current === 'unsent-first') return null
+      return 'sent-first'
+    })
+    setNameSort(null)
+    setCurrentPage(1)
+  }
+
+  const toggleNameSort = () => {
+    setNameSort(current => {
+      if (current === 'ascending') return 'descending'
+      if (current === 'descending') return null
+      return 'ascending'
+    })
+    setInvitationSort(null)
     setCurrentPage(1)
   }
 
@@ -1063,9 +1164,16 @@ function Admin() {
                 className="input-field"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                placeholder="Cari nama tamu, alamat, nomor kontak, atau batch..."
+                list="guest-filter-suggestions"
+                autoComplete="off"
+                placeholder="Cari atau filter, contoh: Tamu dari = Ica"
                 style={{ paddingLeft: '40px' }}
               />
+              <datalist id="guest-filter-suggestions">
+                {filterSuggestions.map((suggestion, index) => (
+                  <option key={`${suggestion}-${index}`} value={suggestion} />
+                ))}
+              </datalist>
               <span style={{
                 position: 'absolute',
                 left: '14px',
@@ -1173,23 +1281,38 @@ function Admin() {
               <table className="admin-guest-table">
                 <colgroup>
                   <col style={{ width: '3%' }} />
-                  <col style={{ width: '10%' }} />
-                  <col style={{ width: '10%' }} />
-                  <col style={{ width: '10%' }} />
+                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '9%' }} />
                   <col style={{ width: '6%' }} />
                   <col style={{ width: '5%' }} />
-                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '7%' }} />
                   <col style={{ width: '7%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '9%' }} />
-                  <col style={{ width: '9%' }} />
-                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '19%' }} />
                   <col style={{ width: '4%' }} />
                 </colgroup>
                 <thead>
                   <tr>
                     <th>No</th>
-                    <th>Nama Tamu</th>
+                    <th aria-sort={nameSort || 'none'}>
+                      <button
+                        type="button"
+                        className="admin-sort-button"
+                        data-sort={nameSort || 'none'}
+                        onClick={toggleNameSort}
+                        title={nameSort === 'ascending'
+                          ? 'Urutkan nama Z ke A'
+                          : nameSort === 'descending'
+                            ? 'Matikan pengurutan nama'
+                            : 'Urutkan nama A ke Z'}
+                      >
+                        Nama Tamu
+                        <span className="admin-sort-indicator" aria-hidden="true" />
+                      </button>
+                    </th>
                     <th>Alamat</th>
                     <th>Contact Number</th>
                     <th>Tamu dari</th>
@@ -1197,7 +1320,26 @@ function Admin() {
                     <th>Status</th>
                     <th>Check-in</th>
                     <th>QR</th>
-                    <th>Status Terkirim</th>
+                    <th aria-sort={invitationSort === 'sent-first'
+                      ? 'descending'
+                      : invitationSort === 'unsent-first'
+                        ? 'ascending'
+                        : 'none'}>
+                      <button
+                        type="button"
+                        className="admin-sort-button"
+                        data-sort={invitationSort || 'none'}
+                        onClick={toggleInvitationSort}
+                        title={invitationSort === 'sent-first'
+                          ? 'Tampilkan yang belum terkirim lebih dulu'
+                          : invitationSort === 'unsent-first'
+                            ? 'Matikan pengurutan status terkirim'
+                            : 'Tampilkan yang sudah terkirim lebih dulu'}
+                      >
+                        Status Terkirim
+                        <span className="admin-sort-indicator" aria-hidden="true" />
+                      </button>
+                    </th>
                     <th>Terkirim Kapan</th>
                     <th>Aksi Undangan</th>
                     <th></th>
@@ -1315,7 +1457,7 @@ function Admin() {
                             </span>
                           )}
                         </td>
-                        <td data-label="Aksi Undangan">
+                        <td data-label="Aksi Undangan" className="admin-invitation-cell">
                           <div className="admin-invitation-actions">
                             {canOpenInvitation && (
                               <a
@@ -1392,7 +1534,7 @@ function Admin() {
                             </span>
                           )}
                         </td>
-                        <td data-label="Hapus">
+                        <td data-label="Hapus" className="admin-delete-cell">
                           <button
                             className="btn-icon-circular"
                             onClick={() => deleteGuest(guest.id, guest.nama_tamu)}

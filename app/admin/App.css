@@ -854,6 +854,67 @@ select.input-field option {
   line-height: 1.2;
 }
 
+.admin-sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+}
+
+.admin-sort-button:hover,
+.admin-sort-button:focus-visible,
+.admin-sort-button:not([data-sort='none']) {
+  color: var(--color-primary);
+}
+
+.admin-sort-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.admin-sort-indicator {
+  position: relative;
+  width: 8px;
+  height: 12px;
+  flex: 0 0 8px;
+}
+
+.admin-sort-indicator::before,
+.admin-sort-indicator::after {
+  content: '';
+  position: absolute;
+  left: 1px;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+}
+
+.admin-sort-indicator::before {
+  top: 1px;
+  border-bottom: 4px solid currentColor;
+}
+
+.admin-sort-indicator::after {
+  bottom: 1px;
+  border-top: 4px solid currentColor;
+}
+
+.admin-sort-button[data-sort='ascending'] .admin-sort-indicator::after,
+.admin-sort-button[data-sort='sent-first'] .admin-sort-indicator::before,
+.admin-sort-button[data-sort='unsent-first'] .admin-sort-indicator::after {
+  opacity: 0.25;
+}
+
+.admin-sort-button[data-sort='descending'] .admin-sort-indicator::before {
+  opacity: 0.25;
+}
+
 .admin-guest-table td,
 .admin-guest-table .text-caption,
 .admin-guest-table .text-body-strong {
@@ -892,6 +953,8 @@ select.input-field option {
   align-items: center;
   gap: 5px;
   flex-wrap: nowrap;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .admin-invitation-actions .btn-pearl-capsule {
@@ -905,6 +968,10 @@ select.input-field option {
   width: 12px;
   height: 12px;
   flex: 0 0 auto;
+}
+
+.admin-delete-cell {
+  text-align: center;
 }
 
 table {
@@ -1320,6 +1387,15 @@ tbody td {
 
   .admin-invitation-actions {
     flex-wrap: wrap;
+  }
+
+  .admin-guest-table tbody td.admin-invitation-cell {
+    align-items: start;
+  }
+
+  .admin-guest-table tbody td.admin-delete-cell {
+    align-items: center;
+    text-align: left;
   }
 }
 

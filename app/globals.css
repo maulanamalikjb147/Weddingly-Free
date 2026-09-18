@@ -46,6 +46,10 @@ body {
   animation: fade 5s infinite;
 }
 
+.invitation-readable-text {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+}
+
 /* Animasi fade-in dan gerakan */
 .fadeMain {
   opacity: 0;

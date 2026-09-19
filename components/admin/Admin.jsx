@@ -17,7 +17,6 @@ const INVITATION_BASE_URL = (
   process.env.NEXT_PUBLIC_INVITATION_BASE_URL ||
   'https://anisa.maulanamalik.my.id'
 ).replace(/\/$/, '')
-const INVITATION_PREVIEW_VERSION = process.env.NEXT_PUBLIC_INVITATION_PREVIEW_VERSION || '20260919-landscape'
 const searchableText = (value) => String(value ?? '').toLowerCase()
 const BATCH_OPTIONS = ['batch-1', 'batch-2', 'batch-3']
 const normalizeBatch = (value) => {
@@ -532,10 +531,9 @@ function Admin() {
   }
 
   const getInvitationUrl = (guest) => {
-    const invitationUrl = guest.invitation_slug
+    return guest.invitation_slug
       ? `${INVITATION_BASE_URL}/${encodeURIComponent(guest.invitation_slug)}`
       : INVITATION_BASE_URL
-    return `${invitationUrl}?v=${encodeURIComponent(INVITATION_PREVIEW_VERSION)}`
   }
 
   const copyInvitationMessage = async (guest) => {

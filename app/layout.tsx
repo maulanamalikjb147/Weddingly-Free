@@ -41,11 +41,18 @@ const absoluteUrl = (value: string) => {
   }
 };
 
+const metadataVersion = (value: string) => {
+  let hash = 0;
+  for (const character of value) hash = ((hash << 5) - hash + character.charCodeAt(0)) | 0;
+  return Math.abs(hash).toString(36);
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   const config = await fetchConfig();
   const title = `The Wedding of ${config.coupleNames}`;
   const description = `Wedding Invitation of ${config.coupleNames}`;
   const previewImage = absoluteUrl(config.backgrounds?.bg_bride_groom || "/foto_1_samping.jpg");
+  const socialPreviewImage = `${invitationBaseUrl}/api/og?v=${metadataVersion(`${previewImage}:${title}`)}`;
 
   return {
     metadataBase: new URL(invitationBaseUrl),
@@ -64,7 +71,10 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       images: [{
-        url: previewImage,
+        url: socialPreviewImage,
+        width: 1200,
+        height: 630,
+        type: "image/png",
         alt: config.coupleNames,
       }],
     },
@@ -72,7 +82,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [previewImage],
+      images: [socialPreviewImage],
     },
   };
 }

@@ -26,6 +26,7 @@ const broadcastBatches = ['batch-1', 'batch-2', 'batch-3'] as const
 type BroadcastBatch = typeof broadcastBatches[number]
 
 const invitationBaseUrl = (process.env.NEXT_PUBLIC_INVITATION_BASE_URL || 'https://anisa.maulanamalik.my.id').replace(/\/$/, '')
+const invitationPreviewVersion = process.env.NEXT_PUBLIC_INVITATION_PREVIEW_VERSION || '20260919-landscape'
 const terminalStatuses = ['completed', 'failed', 'cancelled']
 
 const messageFromError = (error: unknown) => error instanceof Error ? error.message : String(error || 'Unknown error')
@@ -48,8 +49,8 @@ const normalizePhone = (value: unknown) => {
 
 const renderTemplate = (template: string, guest: InvitationGuest, tamuFrom: string) => {
   const invitationUrl = guest.invitation_slug
-    ? `${invitationBaseUrl}/${encodeURIComponent(guest.invitation_slug)}`
-    : invitationBaseUrl
+    ? `${invitationBaseUrl}/${encodeURIComponent(guest.invitation_slug)}?v=${encodeURIComponent(invitationPreviewVersion)}`
+    : `${invitationBaseUrl}?v=${encodeURIComponent(invitationPreviewVersion)}`
 
   return template
     .replaceAll('\\n', '\n')

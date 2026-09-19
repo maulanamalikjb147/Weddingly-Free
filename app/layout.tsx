@@ -74,7 +74,7 @@ export async function generateMetadata(): Promise<Metadata> {
         url: socialPreviewImage,
         width: 1200,
         height: 630,
-        type: "image/png",
+        type: "image/jpeg",
         alt: config.coupleNames,
       }],
     },

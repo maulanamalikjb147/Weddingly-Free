@@ -566,7 +566,7 @@ function Admin() {
     }
   }
 
-  const openManualWhatsApp = (guest) => {
+  const openManualWhatsApp = async (guest) => {
     const message = renderInvitationMessage(guest)
     if (!message) {
       setError(`Template pesan untuk ${guest.tamu_from || 'tamu ini'} belum tersedia`)
@@ -585,6 +585,7 @@ function Admin() {
     }
 
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
+    await updateManualInvitationStatus(guest, 'sent')
   }
 
   const downloadTemplate = async () => {

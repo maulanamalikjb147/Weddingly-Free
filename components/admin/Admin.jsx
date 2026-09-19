@@ -62,6 +62,7 @@ const uniqueValues = (values) => [...new Set(values.filter(Boolean).map(value =>
 
 function Admin() {
   const [guests, setGuests] = useState([])
+  const [rsvps, setRsvps] = useState([])
   const [configTamuDari, setConfigTamuDari] = useState([])
   const [showAddModal, setShowAddModal] = useState(false)
   const [newGuest, setNewGuest] = useState({ nama_tamu: '', alamat_tamu: '', contact_number: '', tamu_from: '', batch: 'batch-1' })
@@ -120,6 +121,14 @@ function Admin() {
   const [invitationSort, setInvitationSort] = useState(null)
   const [nameSort, setNameSort] = useState(null)
   const ITEMS_PER_PAGE = 20
+
+  const rsvpReport = rsvps.reduce((report, rsvp) => {
+    const guestCount = Number(rsvp.guests) || 0
+    report.total += guestCount
+    if (rsvp.attendance === 'hadir') report.attending += guestCount
+    if (rsvp.attendance === 'tidak') report.notAttending += guestCount
+    return report
+  }, { total: 0, attending: 0, notAttending: 0 })
 
   const filterSuggestions = [
     'Nama Tamu = ',
@@ -224,6 +233,20 @@ function Admin() {
     }
   }
 
+  const fetchRsvps = async () => {
+    try {
+      const { data, error: rsvpError } = await supabase
+        .from('rsvps')
+        .select('attendance, guests')
+
+      if (rsvpError) throw rsvpError
+      setRsvps(data || [])
+    } catch (err) {
+      console.error('Error fetching RSVP report:', err)
+      setError('Gagal memuat laporan RSVP: ' + err.message)
+    }
+  }
+
   const fetchConfigTamuDari = async () => {
     try {
       const { data, error } = await supabase
@@ -283,11 +306,29 @@ function Admin() {
     if (!isLoggedIn) return
     const loadTimer = window.setTimeout(() => {
       fetchGuests()
+      fetchRsvps()
       fetchConfigTamuDari()
       fetchInvitationTemplates()
     }, 0)
 
     return () => window.clearTimeout(loadTimer)
+  }, [isLoggedIn])
+
+  useEffect(() => {
+    if (!isLoggedIn) return
+
+    const channel = supabase
+      .channel('admin-rsvp-report')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'rsvps' },
+        () => { void fetchRsvps() }
+      )
+      .subscribe()
+
+    return () => {
+      void supabase.removeChannel(channel)
+    }
   }, [isLoggedIn])
 
   useEffect(() => {
@@ -1150,6 +1191,43 @@ function Admin() {
               <p className="text-display-md" style={{ color: 'var(--color-primary)', fontSize: '28px' }}>
                 {guests.filter(g => g.is_generated).length}
               </p>
+            </div>
+          </div>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+            <div style={{
+              width: '44px',
+              height: '44px',
+              flex: '0 0 44px',
+              borderRadius: 'var(--rounded-sm)',
+              background: '#f3e8ff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#6b21a8'
+            }}>
+              <Icon name="checkCircle" size={22} />
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
+                <p className="text-caption" style={{ color: 'var(--color-ink-muted-48)' }}>Laporan RSVP</p>
+                <span className="text-fine-print" style={{ color: 'var(--color-ink-muted-48)', whiteSpace: 'nowrap' }}>
+                  {rsvps.length} respons
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '10px' }}>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '20px', color: 'var(--color-ink)' }}>{rsvpReport.total}</strong>
+                  <span className="text-fine-print" style={{ color: 'var(--color-ink-muted-48)' }}>Total orang</span>
+                </div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '20px', color: '#155724' }}>{rsvpReport.attending}</strong>
+                  <span className="text-fine-print" style={{ color: 'var(--color-ink-muted-48)' }}>Hadir</span>
+                </div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '20px', color: '#b42318' }}>{rsvpReport.notAttending}</strong>
+                  <span className="text-fine-print" style={{ color: 'var(--color-ink-muted-48)', whiteSpace: 'nowrap' }}>Tidak hadir</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

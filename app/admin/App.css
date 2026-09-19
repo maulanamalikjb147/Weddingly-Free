@@ -488,6 +488,13 @@ select.input-field option {
   z-index: 99;
 }
 
+.admin-sub-nav-actions {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
 .admin-nav-button {
   font-size: 12px;
   padding: 6px 12px;
@@ -952,7 +959,7 @@ select.input-field option {
   display: flex;
   align-items: center;
   gap: 5px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   min-width: 0;
   max-width: 100%;
 }
@@ -968,6 +975,17 @@ select.input-field option {
   width: 12px;
   height: 12px;
   flex: 0 0 auto;
+}
+
+.admin-invitation-actions .admin-manual-send-button {
+  border-color: #c7e4d0;
+  background: #eef8f1;
+  color: #246a3d;
+}
+
+.admin-invitation-actions .admin-manual-send-button:hover {
+  border-color: #8fc7a0;
+  background: #e2f3e7;
 }
 
 .admin-delete-cell {
@@ -1411,8 +1429,17 @@ tbody td {
 }
 
 @media (max-width: 734px) {
+  .admin-page {
+    overflow-x: hidden;
+  }
+
+  .admin-global-nav {
+    height: 52px;
+    padding: 0 14px;
+  }
+
   .admin-main-content {
-    padding: var(--spacing-md) var(--spacing-sm);
+    padding: 12px;
   }
 
   .admin-global-nav,
@@ -1422,9 +1449,124 @@ tbody td {
   }
 
   .admin-sub-nav {
-    align-items: flex-start;
+    min-height: 0;
+    padding: 10px 12px;
+    align-items: stretch;
     flex-direction: column;
     position: static;
+    gap: 8px;
+  }
+
+  .admin-sub-nav h2 {
+    font-size: 22px;
+    line-height: 1.2;
+  }
+
+  .admin-sub-nav-actions {
+    width: 100%;
+    padding-bottom: 3px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+
+  .admin-sub-nav-actions > * {
+    flex: 0 0 auto;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .admin-stats-grid .card {
+    min-height: 70px;
+    padding: 10px;
+  }
+
+  .admin-stats-grid .card > div:first-child {
+    display: none !important;
+  }
+
+  .admin-stats-grid .text-display-md {
+    font-size: 22px !important;
+  }
+
+  .admin-search-card {
+    padding: 10px;
+    margin-bottom: 12px !important;
+  }
+
+  .admin-search-card > div > div {
+    min-width: 100% !important;
+  }
+
+  .admin-search-card .btn-pearl-capsule {
+    width: 100%;
+  }
+
+  .admin-table-card {
+    overflow: visible !important;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .admin-table-wrap {
+    overflow: visible;
+  }
+
+  .admin-guest-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .admin-guest-table tr {
+    padding: 12px 10px;
+    border: 1px solid var(--color-hairline);
+    border-radius: 10px;
+    background: var(--color-canvas);
+    box-shadow: 0 2px 8px rgba(20, 24, 20, 0.04);
+  }
+
+  .admin-guest-table tbody td {
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 8px;
+    padding: 5px 4px;
+  }
+
+  .admin-guest-table tbody td::before {
+    font-size: 11px;
+  }
+
+  .admin-guest-table .status-select {
+    width: 100%;
+    max-width: none;
+  }
+
+  .admin-guest-table tbody td.admin-invitation-cell {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding-top: 10px;
+  }
+
+  .admin-invitation-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .admin-invitation-actions .btn-pearl-capsule {
+    width: 100%;
+    min-height: 34px;
+  }
+
+  .admin-guest-table tbody td.admin-delete-cell {
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-divider-soft);
   }
 
   .bulk-form-grid,

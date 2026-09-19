@@ -564,6 +564,27 @@ function Admin() {
     }
   }
 
+  const openManualWhatsApp = (guest) => {
+    const message = renderInvitationMessage(guest)
+    if (!message) {
+      setError(`Template pesan untuk ${guest.tamu_from || 'tamu ini'} belum tersedia`)
+      setTimeout(() => setError(null), 5000)
+      return
+    }
+
+    let phoneNumber = String(guest.contact_number || '').replace(/\D/g, '')
+    if (phoneNumber.startsWith('0')) phoneNumber = `62${phoneNumber.slice(1)}`
+    if (phoneNumber.startsWith('8')) phoneNumber = `62${phoneNumber}`
+
+    if (!/^62\d{7,15}$/.test(phoneNumber)) {
+      setError(`Nomor WhatsApp ${guest.nama_tamu} belum valid`)
+      setTimeout(() => setError(null), 5000)
+      return
+    }
+
+    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
+  }
+
   const downloadTemplate = async () => {
     try {
       setLoadingTemplate(true)
@@ -927,17 +948,7 @@ function Admin() {
       background: 'var(--color-canvas-parchment)'
     }}>
       {/* Global Nav */}
-      <nav style={{
-        height: '44px',
-        background: 'var(--color-surface-black)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 var(--spacing-lg)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100
-      }}>
+      <nav className="admin-global-nav">
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)' }}>
           <span className="text-nav-link" style={{ color: 'var(--color-on-dark)', fontWeight: 600 }}>
             Wedding Admin
@@ -962,22 +973,11 @@ function Admin() {
       </nav>
 
       {/* Sub Nav */}
-      <div style={{
-        height: '52px',
-        background: 'var(--color-canvas)',
-        borderBottom: '1px solid var(--color-hairline)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 var(--spacing-lg)',
-        position: 'sticky',
-        top: '44px',
-        zIndex: 99
-      }}>
+      <div className="admin-sub-nav">
         <h2 className="text-tagline" style={{ color: 'var(--color-ink)' }}>
           Dashboard
         </h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+        <div className="admin-sub-nav-actions">
           <Link
             to="/admin/content"
             className="btn-pearl-capsule"
@@ -1518,6 +1518,27 @@ function Admin() {
                             >
                               <Icon name="copy" size={13} />
                               Copy Message
+                            </button>
+                            <button
+                              className="btn-pearl-capsule admin-manual-send-button"
+                              onClick={() => openManualWhatsApp(guest)}
+                              disabled={!canSendInvitation || !canCopyMessage}
+                              title={!canSendInvitation
+                                ? disabledReason
+                                : canCopyMessage
+                                  ? `Buka WhatsApp dengan pesan untuk ${guest.nama_tamu}`
+                                  : 'Template pesan belum tersedia'}
+                              style={{
+                                fontSize: '12px',
+                                padding: '6px 10px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                opacity: canSendInvitation && canCopyMessage ? 1 : 0.5
+                              }}
+                            >
+                              <Icon name="send" size={13} />
+                              Send Manual
                             </button>
                           </div>
                           {guest.invitation_error && (

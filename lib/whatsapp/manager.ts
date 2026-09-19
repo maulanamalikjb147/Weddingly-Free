@@ -284,6 +284,44 @@ export async function logoutWhatsAppSession(db: WhatsAppDbClient, requestedSourc
   }).eq('name', source.name)
 }
 
+export async function deleteWhatsAppSession(db: WhatsAppDbClient, requestedSource: string) {
+  const runtime = runtimeForSource(requestedSource)
+  const { data: source, error: sourceError } = await db
+    .from(SUPABASE_TABLES.configTamuDari)
+    .select('name, whatsapp_session_id')
+    .ilike('name', requestedSource.trim())
+    .limit(1)
+    .maybeSingle()
+
+  if (sourceError) throw sourceError
+  if (!source?.name) throw new Error(`Pengirim ${requestedSource} tidak ditemukan`)
+
+  const sessionId = runtime?.sessionId || source.whatsapp_session_id || sessionIdFor(source.name)
+  if (runtime) {
+    runtime.intentionalClose = true
+    if (runtime.reconnectTimer) clearTimeout(runtime.reconnectTimer)
+    await runtime.socket?.logout().catch(() => undefined)
+    runtimes.delete(runtime.sessionId)
+  }
+
+  const { error: configError } = await db
+    .from(SUPABASE_TABLES.configTamuDari)
+    .update({
+      whatsapp_enabled: false,
+      whatsapp_session_id: null,
+      whatsapp_phone: null,
+      whatsapp_connected_at: null,
+    })
+    .eq('name', source.name)
+  if (configError) throw configError
+
+  const { error: deleteError } = await db
+    .from(SUPABASE_TABLES.whatsappSessions)
+    .delete()
+    .eq('id', sessionId)
+  if (deleteError) throw deleteError
+}
+
 export async function refreshWhatsAppSessionQr(db: WhatsAppDbClient, requestedSource: string) {
   const runtime = runtimeForSource(requestedSource)
   const { data: source } = await db

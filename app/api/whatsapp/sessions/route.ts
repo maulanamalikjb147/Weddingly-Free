@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 import {
   connectWhatsAppSession,
+  deleteWhatsAppSession,
   listWhatsAppSessions,
   logoutWhatsAppSession,
   refreshWhatsAppSessionQr,
@@ -41,6 +42,11 @@ export async function POST(request: Request) {
 
     if (body.action === 'logout') {
       await logoutWhatsAppSession(db, tamuFrom)
+      return NextResponse.json({ success: true })
+    }
+
+    if (body.action === 'delete') {
+      await deleteWhatsAppSession(db, tamuFrom)
       return NextResponse.json({ success: true })
     }
 

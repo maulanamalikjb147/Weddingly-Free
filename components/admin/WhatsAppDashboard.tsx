@@ -19,6 +19,7 @@ import {
   RefreshCw,
   Send,
   Smartphone,
+  Trash2,
   Users,
   X,
   XCircle,
@@ -210,7 +211,9 @@ export default function WhatsAppDashboard() {
     setRandomizeDelay(firstConnected.randomizeDelay)
   }, [selectedSender, sessions])
 
-  const runSessionAction = useCallback(async (action: 'connect' | 'logout' | 'refresh', tamuFrom: string) => {
+  const runSessionAction = useCallback(async (action: 'connect' | 'logout' | 'refresh' | 'delete', tamuFrom: string) => {
+    if (action === 'delete' && !window.confirm(`Hapus session WhatsApp ${tamuFrom} beserta data login tersimpan?`)) return
+
     setBusyAction(`${action}:${tamuFrom}`)
     setError(null)
     try {
@@ -224,9 +227,12 @@ export default function WhatsAppDashboard() {
       } else if (action === 'refresh') {
         setQrSender(tamuFrom)
         setSuccess(`QR ${tamuFrom} diperbarui`)
-      } else {
+      } else if (action === 'logout') {
         setQrSender(null)
         setSuccess(`Session ${tamuFrom} sudah dikeluarkan`)
+      } else {
+        setQrSender(null)
+        setSuccess(`Session ${tamuFrom} dan data login tersimpan sudah dihapus`)
       }
       await loadDashboard(false)
     } catch (requestError) {
@@ -367,6 +373,11 @@ export default function WhatsAppDashboard() {
                       <button className="wa-button wa-button-primary" onClick={() => void runSessionAction('connect', session.tamuFrom)} disabled={waiting}>
                         {waiting ? <LoaderCircle size={17} className="wa-spin" /> : <QrCode size={17} />}
                         Add session
+                      </button>
+                    )}
+                    {(session.sessionSaved || session.status !== 'disconnected') && (
+                      <button className="wa-icon-button wa-icon-danger" onClick={() => void runSessionAction('delete', session.tamuFrom)} disabled={waiting} aria-label={`Hapus session ${session.tamuFrom}`} title="Hapus session dari database">
+                        <Trash2 size={17} />
                       </button>
                     )}
                   </div>

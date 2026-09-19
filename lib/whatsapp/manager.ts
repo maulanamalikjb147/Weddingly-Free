@@ -170,7 +170,7 @@ export async function connectWhatsAppSession(db: WhatsAppDbClient, requestedSour
     logger,
     markOnlineOnConnect: false,
     syncFullHistory: false,
-    generateHighQualityLinkPreview: false,
+    generateHighQualityLinkPreview: true,
   })
   runtime.socket = socket
 

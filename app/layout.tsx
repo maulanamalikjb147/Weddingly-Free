@@ -30,11 +30,50 @@ const ovo = Ovo({
 
 import { fetchConfig } from "@/lib/config";
 
+const invitationBaseUrl = (process.env.NEXT_PUBLIC_INVITATION_BASE_URL || "https://anisa.maulanamalik.my.id").replace(/\/$/, "");
+const faviconUrl = "https://nemuftsdmjzkzcygkjpg.supabase.co/storage/v1/object/public/wedding-assets/favico.png";
+
+const absoluteUrl = (value: string) => {
+  try {
+    return new URL(value, `${invitationBaseUrl}/`).toString();
+  } catch {
+    return `${invitationBaseUrl}/foto_1_samping.jpg`;
+  }
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   const config = await fetchConfig();
+  const title = `The Wedding of ${config.coupleNames}`;
+  const description = `Wedding Invitation of ${config.coupleNames}`;
+  const previewImage = absoluteUrl(config.backgrounds?.bg_bride_groom || "/foto_1_samping.jpg");
+
   return {
-    title: `The Wedding of ${config.coupleNames}`,
-    description: `Wedding Invitation of ${config.coupleNames}, made by Peter Shaan`,
+    metadataBase: new URL(invitationBaseUrl),
+    title,
+    description,
+    icons: {
+      icon: [{ url: faviconUrl, type: "image/png" }],
+      shortcut: [{ url: faviconUrl, type: "image/png" }],
+      apple: [{ url: faviconUrl, type: "image/png" }],
+    },
+    openGraph: {
+      type: "website",
+      locale: "id_ID",
+      url: invitationBaseUrl,
+      siteName: title,
+      title,
+      description,
+      images: [{
+        url: previewImage,
+        alt: config.coupleNames,
+      }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [previewImage],
+    },
   };
 }
 

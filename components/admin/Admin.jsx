@@ -59,6 +59,34 @@ const matchesSmartFilter = (guest, filter) => {
 }
 
 const uniqueValues = (values) => [...new Set(values.filter(Boolean).map(value => String(value).trim()))]
+const parseCsvLine = (line, delimiter) => {
+  const values = []
+  let value = ''
+  let quoted = false
+
+  for (let index = 0; index < line.length; index++) {
+    const character = line[index]
+    if (character === '"') {
+      if (quoted && line[index + 1] === '"') {
+        value += '"'
+        index += 1
+      } else {
+        quoted = !quoted
+      }
+    } else if (character === delimiter && !quoted) {
+      values.push(value.trim())
+      value = ''
+    } else {
+      value += character
+    }
+  }
+
+  values.push(value.trim())
+  return values
+}
+const guestIdentity = (guest) => {
+  return searchableText(guest.nama_tamu).trim().replace(/\s+/g, ' ')
+}
 
 function Admin() {
   const [guests, setGuests] = useState([])
@@ -79,6 +107,7 @@ function Admin() {
   const [selectedExportFrom, setSelectedExportFrom] = useState('')
   const [selectedBulkFrom, setSelectedBulkFrom] = useState('')
   const [bulkGuests, setBulkGuests] = useState([])
+  const [bulkDuplicateCount, setBulkDuplicateCount] = useState(0)
   const [loadingTemplate, setLoadingTemplate] = useState(false)
   const [uploadingBulk, setUploadingBulk] = useState(false)
   const [bulkError, setBulkError] = useState(null)
@@ -647,42 +676,13 @@ function Admin() {
     }
 
     const csvCell = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`
-    const csvDate = (value) => value
-      ? new Date(value).toLocaleString('id-ID', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-      : ''
-    const headers = [
-      'No',
-      'Nama Tamu',
-      'Alamat',
-      'Contact Number',
-      'Tamu dari',
-      'Batch',
-      'Status Kehadiran',
-      'Check-in',
-      'Status Terkirim',
-      'Terkirim Kapan',
-      'Metode Pengiriman',
-      'Link Undangan'
-    ]
-    const rows = exportedGuests.map((guest, index) => [
-      index + 1,
+    const headers = ['Nama tamu', 'Alamat', 'Contact Number', 'Tamu dari', 'Batch']
+    const rows = exportedGuests.map(guest => [
       guest.nama_tamu,
       guest.alamat_tamu,
       guest.contact_number ? `="${String(guest.contact_number).replaceAll('"', '""')}"` : '',
       guest.tamu_from,
-      guest.batch || 'batch-1',
-      guest.hadir === true ? 'Hadir' : guest.hadir === false ? 'Tidak Hadir' : 'Belum',
-      csvDate(guest.checkin),
-      guest.invitation_status === 'sent' ? 'Terkirim' : guest.invitation_status === 'failed' ? 'Gagal' : guest.invitation_status === 'sending' ? 'Diproses' : 'Belum',
-      csvDate(guest.invitation_sent_at),
-      guest.invitation_delivery_method || '',
-      getInvitationUrl(guest)
+      guest.batch || 'batch-1'
     ])
     const csvContent = `sep=;\r\n${[headers, ...rows]
       .map(row => row.map(csvCell).join(';'))
@@ -747,6 +747,7 @@ function Admin() {
     const file = e.target.files[0]
     if (!file) return
     setUploadedFile(file)
+    setBulkDuplicateCount(0)
 
     const reader = new FileReader()
     reader.onload = (event) => {
@@ -762,7 +763,7 @@ function Admin() {
         // Detect delimiter and determine start index for parsing data
         let delimiter = '|'
         let startIndex = 1
-        let firstLine = activeLines[0]
+        let firstLine = activeLines[0].replace(/^\uFEFF/, '')
 
         if (firstLine.startsWith('sep=')) {
           delimiter = firstLine.substring(4).trim().charAt(0) || ';'
@@ -784,7 +785,7 @@ function Admin() {
         const normalizeHeader = (value) => value.toLowerCase().replace(/[^a-z0-9]/g, '')
         const normalizeContactNumber = (value) => value.replace(/[^\d]/g, '')
         const looksLikeContactNumber = (value) => /^62\d{7,15}$/.test(normalizeContactNumber(value))
-        const headerColumns = activeLines[startIndex - 1].split(delimiter).map(col => normalizeHeader(col.trim()))
+        const headerColumns = parseCsvLine(activeLines[startIndex - 1], delimiter).map(col => normalizeHeader(col.trim()))
         const indexOfHeader = (...names) => {
           const normalizedNames = names.map(normalizeHeader)
           return headerColumns.findIndex(header => normalizedNames.includes(header))
@@ -798,8 +799,11 @@ function Admin() {
 
         const parsedGuests = []
         const invalidBatchRows = []
+        const existingGuestKeys = new Set(guests.map(guestIdentity))
+        const parsedGuestKeys = new Set()
+        let duplicateCount = 0
         for (let i = startIndex; i < activeLines.length; i++) {
-          const columns = activeLines[i].split(delimiter).map(col => col.trim())
+          const columns = parseCsvLine(activeLines[i], delimiter)
           const nama_tamu = columns[nameIndex >= 0 ? nameIndex : 0] || ''
           const alamat_tamu = columns[addressIndex >= 0 ? addressIndex : 1] || ''
           const contactColumnIndex = contactIndex >= 0
@@ -826,7 +830,7 @@ function Admin() {
             tamu_from = selectedBulkFrom
           }
 
-          parsedGuests.push({
+          const parsedGuest = {
             nama_tamu,
             alamat_tamu,
             contact_number: contact_number || null,
@@ -835,14 +839,26 @@ function Admin() {
             hadir: null,
             is_generated: false,
             signed_by: null
-          })
+          }
+          const identity = guestIdentity(parsedGuest)
+          if (existingGuestKeys.has(identity) || parsedGuestKeys.has(identity)) {
+            duplicateCount += 1
+            continue
+          }
+
+          parsedGuestKeys.add(identity)
+          parsedGuests.push(parsedGuest)
         }
+
+        setBulkDuplicateCount(duplicateCount)
 
         if (invalidBatchRows.length > 0) {
           setBulkGuests([])
           setBulkError(`Batch hanya boleh batch-1, batch-2, atau batch-3. Cek baris: ${invalidBatchRows.join(', ')}.`)
         } else if (parsedGuests.length === 0) {
-          setBulkError('Tidak ada tamu valid yang ditemukan di file CSV.')
+          setBulkError(duplicateCount > 0
+            ? `Semua ${duplicateCount} tamu sudah ada di database.`
+            : 'Tidak ada tamu valid yang ditemukan di file CSV.')
         } else {
           setBulkGuests(parsedGuests)
           setBulkError(null)
@@ -874,16 +890,32 @@ function Admin() {
         if (uploadError) throw uploadError
       }
 
-      // Insert guests into database
+      const { data: currentGuests, error: existingGuestsError } = await supabase
+        .from('data_tamu')
+        .select('nama_tamu, alamat_tamu, contact_number, tamu_from')
+
+      if (existingGuestsError) throw existingGuestsError
+
+      const existingGuestKeys = new Set((currentGuests || []).map(guestIdentity))
+      const guestsToInsert = bulkGuests.filter(guest => !existingGuestKeys.has(guestIdentity(guest)))
+      const skippedCount = bulkDuplicateCount + (bulkGuests.length - guestsToInsert.length)
+
+      if (guestsToInsert.length === 0) {
+        setBulkError(`Tidak ada data baru. ${skippedCount} tamu sudah ada di database.`)
+        return
+      }
+
+      // Insert only guests that are not already present.
       const { error: insertError } = await supabase
         .from('data_tamu')
-        .insert(bulkGuests)
+        .insert(guestsToInsert)
 
       if (insertError) throw insertError
 
-      setSuccess(`Berhasil menambahkan ${bulkGuests.length} tamu secara bulk!`)
+      setSuccess(`Import selesai: ${guestsToInsert.length + skippedCount} total, ${guestsToInsert.length} data baru, ${skippedCount} data existing.`)
       setShowBulkModal(false)
       setBulkGuests([])
+      setBulkDuplicateCount(0)
       setSelectedBulkFrom('')
       setUploadedFile(null)
       await fetchGuests()
@@ -1181,6 +1213,7 @@ function Admin() {
               setShowBulkModal(true)
               setSelectedBulkFrom('')
               setBulkGuests([])
+              setBulkDuplicateCount(0)
               setUploadedFile(null)
               setBulkError(null)
             }}
@@ -2165,6 +2198,32 @@ function Admin() {
               )}
 
               {/* Preview parsed guests */}
+              {(bulkGuests.length > 0 || bulkDuplicateCount > 0) && (
+                <div style={{ marginBottom: 'var(--spacing-md)' }}>
+                  <p className="text-caption-strong" style={{ color: 'var(--color-ink)', marginBottom: 'var(--spacing-xs)' }}>
+                    Ringkasan File
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 'var(--spacing-sm)' }}>
+                    <div>
+                      <strong style={{ display: 'block', fontSize: '20px', color: 'var(--color-ink)' }}>{bulkGuests.length + bulkDuplicateCount}</strong>
+                      <span className="text-fine-print" style={{ color: 'var(--color-ink-muted-48)' }}>Total data</span>
+                    </div>
+                    <div>
+                      <strong style={{ display: 'block', fontSize: '20px', color: '#155724' }}>{bulkGuests.length}</strong>
+                      <span className="text-fine-print" style={{ color: 'var(--color-ink-muted-48)' }}>Data baru</span>
+                    </div>
+                    <div>
+                      <strong style={{ display: 'block', fontSize: '20px', color: '#8a6100' }}>{bulkDuplicateCount}</strong>
+                      <span className="text-fine-print" style={{ color: 'var(--color-ink-muted-48)' }}>Sudah ada</span>
+                    </div>
+                  </div>
+                  {bulkDuplicateCount > 0 && (
+                    <p className="text-fine-print" style={{ color: '#725500', marginTop: 'var(--spacing-xs)' }}>
+                      Data existing dilewati dan tidak akan diubah.
+                    </p>
+                  )}
+                </div>
+              )}
               {bulkGuests.length > 0 && (
                 <div style={{ marginBottom: 'var(--spacing-xl)' }}>
                   <label className="text-caption-strong" style={{

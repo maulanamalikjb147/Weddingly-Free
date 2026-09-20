@@ -75,6 +75,8 @@ function Admin() {
 
   // Bulk add states
   const [showBulkModal, setShowBulkModal] = useState(false)
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [selectedExportFrom, setSelectedExportFrom] = useState('')
   const [selectedBulkFrom, setSelectedBulkFrom] = useState('')
   const [bulkGuests, setBulkGuests] = useState([])
   const [loadingTemplate, setLoadingTemplate] = useState(false)
@@ -129,6 +131,10 @@ function Admin() {
     if (rsvp.attendance === 'tidak') report.notAttending += guestCount
     return report
   }, { total: 0, attending: 0, notAttending: 0 })
+  const exportSources = uniqueValues([
+    ...configTamuDari.map(item => item.name),
+    ...guests.map(guest => guest.tamu_from)
+  ]).sort((first, second) => first.localeCompare(second, 'id-ID', { sensitivity: 'base' }))
 
   const filterSuggestions = [
     'Nama Tamu = ',
@@ -629,6 +635,77 @@ function Admin() {
     await updateManualInvitationStatus(guest, 'sent')
   }
 
+  const exportGuestsToCsv = () => {
+    const exportedGuests = selectedExportFrom
+      ? guests.filter(guest => guest.tamu_from === selectedExportFrom)
+      : guests
+
+    if (exportedGuests.length === 0) {
+      setError('Tidak ada data tamu untuk diekspor')
+      setTimeout(() => setError(null), 5000)
+      return
+    }
+
+    const csvCell = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`
+    const csvDate = (value) => value
+      ? new Date(value).toLocaleString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+      : ''
+    const headers = [
+      'No',
+      'Nama Tamu',
+      'Alamat',
+      'Contact Number',
+      'Tamu dari',
+      'Batch',
+      'Status Kehadiran',
+      'Check-in',
+      'Status Terkirim',
+      'Terkirim Kapan',
+      'Metode Pengiriman',
+      'Link Undangan'
+    ]
+    const rows = exportedGuests.map((guest, index) => [
+      index + 1,
+      guest.nama_tamu,
+      guest.alamat_tamu,
+      guest.contact_number ? `="${String(guest.contact_number).replaceAll('"', '""')}"` : '',
+      guest.tamu_from,
+      guest.batch || 'batch-1',
+      guest.hadir === true ? 'Hadir' : guest.hadir === false ? 'Tidak Hadir' : 'Belum',
+      csvDate(guest.checkin),
+      guest.invitation_status === 'sent' ? 'Terkirim' : guest.invitation_status === 'failed' ? 'Gagal' : guest.invitation_status === 'sending' ? 'Diproses' : 'Belum',
+      csvDate(guest.invitation_sent_at),
+      guest.invitation_delivery_method || '',
+      getInvitationUrl(guest)
+    ])
+    const csvContent = `sep=;\r\n${[headers, ...rows]
+      .map(row => row.map(csvCell).join(';'))
+      .join('\r\n')}`
+    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8' })
+    const downloadUrl = URL.createObjectURL(blob)
+    const sourceName = (selectedExportFrom || 'semua-tamu')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = `data-tamu-${sourceName || 'export'}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(downloadUrl)
+
+    setShowExportModal(false)
+    setSuccess(`${exportedGuests.length} tamu berhasil diekspor`)
+    setTimeout(() => setSuccess(null), 3000)
+  }
+
   const downloadTemplate = async () => {
     try {
       setLoadingTemplate(true)
@@ -1080,6 +1157,23 @@ function Admin() {
           >
             <Icon name="refresh" size={14} />
             Refresh
+          </button>
+          <button
+            className="btn-pearl-capsule"
+            onClick={() => {
+              setSelectedExportFrom('')
+              setShowExportModal(true)
+            }}
+            style={{
+              fontSize: '12px',
+              padding: '6px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Icon name="download" size={14} />
+            Export Tamu
           </button>
           <button
             className="btn-pearl-capsule"
@@ -1702,6 +1796,59 @@ function Admin() {
           )}
         </div>
       </div>
+
+      {/* Export Guest Modal */}
+      {showExportModal && (
+        <div className="modal-overlay" onClick={() => setShowExportModal(false)}>
+          <div className="modal-content" onClick={(event) => event.stopPropagation()} style={{ maxWidth: '440px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h2 className="text-tagline" style={{ color: 'var(--color-ink)' }}>Export Tamu</h2>
+                <p className="text-caption" style={{ color: 'var(--color-ink-muted-48)', marginTop: 'var(--spacing-xxs)' }}>
+                  Pilih sumber tamu yang akan dimasukkan ke CSV.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowExportModal(false)}
+                className="btn-icon-circular"
+                title="Tutup"
+                style={{ width: '32px', height: '32px', flex: '0 0 32px' }}
+              >
+                <Icon name="x" size={16} />
+              </button>
+            </div>
+
+            <div style={{ marginTop: 'var(--spacing-lg)', marginBottom: 'var(--spacing-xl)' }}>
+              <label className="text-caption-strong" style={{ display: 'block', marginBottom: 'var(--spacing-xs)', color: 'var(--color-ink)' }}>
+                Tamu dari
+              </label>
+              <select
+                className="input-field"
+                value={selectedExportFrom}
+                onChange={(event) => setSelectedExportFrom(event.target.value)}
+              >
+                <option value="">Semua tamu ({guests.length})</option>
+                {exportSources.map(source => (
+                  <option key={source} value={source}>
+                    {source} ({guests.filter(guest => guest.tamu_from === source).length})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+              <button type="button" className="btn-secondary" onClick={() => setShowExportModal(false)} style={{ flex: 1 }}>
+                Batal
+              </button>
+              <button type="button" className="btn-primary" onClick={exportGuestsToCsv} style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <Icon name="download" size={15} />
+                Download CSV
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Guest Modal */}
       {showAddModal && (

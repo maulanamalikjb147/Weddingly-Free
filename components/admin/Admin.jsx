@@ -33,16 +33,24 @@ const SMART_FILTER_FIELDS = {
   'nomor kontak': 'contact_number',
   'tamu dari': 'tamu_from',
   'batch': 'batch',
+  'status': 'invitation_status',
   'status terkirim': 'invitation_status'
 }
 
-const parseSmartFilter = (query) => {
-  const match = String(query ?? '').match(/^\s*([^=]+?)\s*=\s*(.*?)\s*$/)
-  if (!match) return null
+const parseSmartFilters = (query) => {
+  const parts = String(query ?? '').split(',').map(part => part.trim()).filter(Boolean)
+  if (parts.length === 0) return null
 
-  const field = SMART_FILTER_FIELDS[searchableText(match[1]).trim()]
-  if (!field) return null
-  return { field, value: searchableText(match[2]).trim() }
+  const filters = parts.map(part => {
+    const match = part.match(/^\s*([^=]+?)\s*=\s*(.*?)\s*$/)
+    if (!match) return null
+
+    const field = SMART_FILTER_FIELDS[searchableText(match[1]).trim()]
+    if (!field) return null
+    return { field, value: searchableText(match[2]).trim() }
+  })
+
+  return filters.every(Boolean) ? filters : null
 }
 
 const matchesSmartFilter = (guest, filter) => {
@@ -186,8 +194,8 @@ function Admin() {
 
   // Filter guests based on search query
   const filteredGuests = guests.filter(guest => {
-    const smartFilter = parseSmartFilter(searchQuery)
-    if (smartFilter) return matchesSmartFilter(guest, smartFilter)
+    const smartFilters = parseSmartFilters(searchQuery)
+    if (smartFilters) return smartFilters.every(filter => matchesSmartFilter(guest, filter))
 
     const name = searchableText(guest.nama_tamu)
     const address = searchableText(guest.alamat_tamu)
@@ -1381,7 +1389,7 @@ function Admin() {
                 onChange={handleSearchChange}
                 list="guest-filter-suggestions"
                 autoComplete="off"
-                placeholder="Cari atau filter, contoh: Tamu dari = Ica"
+                placeholder="Cari atau filter, contoh: Tamu dari = Ica, Status = Terkirim"
                 style={{ paddingLeft: '40px' }}
               />
               <datalist id="guest-filter-suggestions">

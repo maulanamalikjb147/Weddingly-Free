@@ -257,6 +257,7 @@ function Admin() {
         .from('data_tamu')
         .select('*')
         .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
 
       if (error) throw error
       setGuests(data || [])
@@ -374,7 +375,13 @@ function Admin() {
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'data_tamu' },
-        () => { void fetchGuests(false) }
+        (payload) => {
+          setGuests(currentGuests => currentGuests.map(guest => (
+            String(guest.id) === String(payload.new.id)
+              ? { ...guest, ...payload.new }
+              : guest
+          )))
+        }
       )
       .subscribe()
 

@@ -1,28 +1,86 @@
 "use client"
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from './supabaseClient'
 import Icon from './Icon'
 
 function Scanner() {
   const [scanning, setScanning] = useState(false)
+  const [cameras, setCameras] = useState([])
+  const [selectedCameraId, setSelectedCameraId] = useState('')
+  const [loadingCameras, setLoadingCameras] = useState(true)
+  const [switchingCamera, setSwitchingCamera] = useState(false)
   const [welcomeData, setWelcomeData] = useState(null)
   const [error, setError] = useState(null)
   const html5QrCodeRef = useRef(null)
+  const scanningRef = useRef(false)
 
-  const startScanner = async () => {
+  const getPreferredCameraId = useCallback((cameraList) => {
+    const savedCameraId = window.localStorage.getItem('weddingly-scanner-camera')
+    if (savedCameraId && cameraList.some((camera) => camera.id === savedCameraId)) {
+      return savedCameraId
+    }
+
+    const backCamera = cameraList.find((camera) =>
+      /back|rear|environment|belakang/i.test(camera.label)
+    )
+
+    return backCamera?.id || cameraList[0]?.id || ''
+  }, [])
+
+  const loadCameras = useCallback(async ({ showError = true } = {}) => {
+    setLoadingCameras(true)
+
+    try {
+      const cameraList = await Html5Qrcode.getCameras()
+      setCameras(cameraList)
+
+      if (cameraList.length === 0) {
+        if (showError) setError('Tidak ada kamera yang terdeteksi di perangkat ini.')
+        setSelectedCameraId('')
+        return []
+      }
+
+      setSelectedCameraId((currentCameraId) => {
+        if (currentCameraId && cameraList.some((camera) => camera.id === currentCameraId)) {
+          return currentCameraId
+        }
+        return getPreferredCameraId(cameraList)
+      })
+      setError(null)
+      return cameraList
+    } catch (err) {
+      console.error('Failed to load cameras:', err)
+      if (showError) {
+        setError('Daftar kamera tidak dapat dibuka. Izinkan akses kamera, lalu coba lagi.')
+      }
+      return []
+    } finally {
+      setLoadingCameras(false)
+    }
+  }, [getPreferredCameraId])
+
+  const startScanner = async (cameraId = selectedCameraId) => {
     try {
       setScanning(true)
+      scanningRef.current = true
       setError(null)
+
+      let targetCameraId = cameraId
+      if (!targetCameraId) {
+        const cameraList = await loadCameras()
+        targetCameraId = getPreferredCameraId(cameraList)
+      }
+
+      if (!targetCameraId) {
+        throw new Error('No camera selected')
+      }
       
       html5QrCodeRef.current = new Html5Qrcode("qr-reader")
       
       await html5QrCodeRef.current.start(
-        { 
-          facingMode: "environment",
-          aspectRatio: 1.0
-        },
+        targetCameraId,
         {
           fps: 30,
           qrbox: function(viewfinderWidth, viewfinderHeight) {
@@ -34,31 +92,58 @@ function Scanner() {
             };
           },
           aspectRatio: 1.0,
-          disableFlip: false,
-          videoConstraints: {
-            advanced: [{ zoom: 1.0 }]
-          }
+          disableFlip: false
         },
         onScanSuccess,
         onScanError
       )
     } catch (err) {
       console.error("Failed to start scanner:", err)
-      setError("Gagal memulai scanner. Pastikan kamera diizinkan.")
+      if (html5QrCodeRef.current) {
+        try {
+          await html5QrCodeRef.current.clear()
+        } catch {
+          // The scanner may not have finished initializing yet.
+        }
+        html5QrCodeRef.current = null
+      }
+      setError("Gagal memulai kamera yang dipilih. Coba pilih kamera lain atau periksa izin kamera.")
       setScanning(false)
+      scanningRef.current = false
     }
   }
 
   const stopScanner = async () => {
     if (html5QrCodeRef.current) {
       try {
-        await html5QrCodeRef.current.stop()
-        html5QrCodeRef.current.clear()
+        if (html5QrCodeRef.current.isScanning) {
+          await html5QrCodeRef.current.stop()
+        }
+        await html5QrCodeRef.current.clear()
       } catch (err) {
         console.error("Error stopping scanner:", err)
+      } finally {
+        html5QrCodeRef.current = null
       }
     }
     setScanning(false)
+    scanningRef.current = false
+  }
+
+  const changeCamera = async (event) => {
+    const cameraId = event.target.value
+    const wasScanning = scanningRef.current
+
+    setSelectedCameraId(cameraId)
+    window.localStorage.setItem('weddingly-scanner-camera', cameraId)
+
+    if (!wasScanning) return
+
+    setSwitchingCamera(true)
+    setError(null)
+    await stopScanner()
+    await startScanner(cameraId)
+    setSwitchingCamera(false)
   }
 
   const onScanSuccess = async (decodedText) => {
@@ -90,7 +175,7 @@ function Scanner() {
 
       setTimeout(() => {
         setWelcomeData(null)
-        if (html5QrCodeRef.current && scanning) {
+        if (html5QrCodeRef.current && scanningRef.current) {
           html5QrCodeRef.current.resume()
         }
       }, 5000)
@@ -99,7 +184,7 @@ function Scanner() {
       setError("QR code tidak valid atau terjadi kesalahan")
       setTimeout(() => {
         setError(null)
-        if (html5QrCodeRef.current && scanning) {
+        if (html5QrCodeRef.current && scanningRef.current) {
           html5QrCodeRef.current.resume()
         }
       }, 3000)
@@ -111,12 +196,20 @@ function Scanner() {
   }
 
   useEffect(() => {
+    loadCameras()
+
+    const handleDeviceChange = () => loadCameras({ showError: false })
+    navigator.mediaDevices?.addEventListener?.('devicechange', handleDeviceChange)
+
     return () => {
+      navigator.mediaDevices?.removeEventListener?.('devicechange', handleDeviceChange)
       if (html5QrCodeRef.current) {
-        stopScanner()
+        const scanner = html5QrCodeRef.current
+        html5QrCodeRef.current = null
+        if (scanner.isScanning) scanner.stop().catch(() => {})
       }
     }
-  }, [])
+  }, [loadCameras])
 
   return (
     <div className="product-tile-parchment" style={{ 
@@ -196,11 +289,76 @@ function Scanner() {
           )}
         </div>
 
+        {/* Camera Picker */}
+        <div style={{
+          textAlign: 'left',
+          marginBottom: 'var(--spacing-md)'
+        }}>
+          <label htmlFor="camera-select" className="text-caption" style={{
+            display: 'block',
+            color: 'var(--color-ink)',
+            marginBottom: 'var(--spacing-xs)',
+            fontWeight: 500
+          }}>
+            Pilih kamera
+          </label>
+          <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+            <select
+              id="camera-select"
+              className="input-field"
+              value={selectedCameraId}
+              onChange={changeCamera}
+              disabled={loadingCameras || switchingCamera || cameras.length === 0}
+              aria-label="Pilih kamera untuk scan QR code"
+              style={{ flex: 1, minWidth: 0 }}
+            >
+              {cameras.length === 0 && (
+                <option value="">
+                  {loadingCameras ? 'Mencari kamera...' : 'Kamera tidak ditemukan'}
+                </option>
+              )}
+              {cameras.map((camera, index) => (
+                <option key={camera.id} value={camera.id}>
+                  {camera.label || `Kamera ${index + 1}`}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => loadCameras()}
+              disabled={loadingCameras || switchingCamera}
+              aria-label="Muat ulang daftar kamera"
+              title="Muat ulang daftar kamera"
+              style={{
+                width: '44px',
+                minWidth: '44px',
+                height: '44px',
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Icon name="refresh" size={17} />
+            </button>
+          </div>
+          <p className="text-fine-print" style={{
+            color: 'var(--color-ink-muted-48)',
+            marginTop: 'var(--spacing-xs)'
+          }}>
+            {switchingCamera
+              ? 'Mengganti kamera...'
+              : 'OBS Virtual Camera, webcam eksternal, dan kamera laptop akan muncul di sini.'}
+          </p>
+        </div>
+
         {/* Action Buttons */}
         {!scanning && !welcomeData && (
           <button 
             className="btn-primary" 
-            onClick={startScanner}
+            onClick={() => startScanner()}
+            disabled={loadingCameras || switchingCamera || cameras.length === 0}
             style={{ 
               width: '100%', 
               padding: '14px 28px',
@@ -252,7 +410,7 @@ function Scanner() {
           color: 'var(--color-ink-muted-48)',
           marginTop: 'var(--spacing-xxl)'
         }}>
-          Pastikan kamera diizinkan untuk menggunakan scanner
+          Kamera dapat diganti langsung dari pilihan di atas
         </p>
       </div>
 
@@ -260,7 +418,7 @@ function Scanner() {
       {welcomeData && (
         <div className="modal-overlay" onClick={() => {
           setWelcomeData(null)
-          if (html5QrCodeRef.current && scanning) {
+          if (html5QrCodeRef.current && scanningRef.current) {
             html5QrCodeRef.current.resume()
           }
         }}>
@@ -320,7 +478,7 @@ function Scanner() {
               className="btn-primary" 
               onClick={() => {
                 setWelcomeData(null)
-                if (html5QrCodeRef.current && scanning) {
+                if (html5QrCodeRef.current && scanningRef.current) {
                   html5QrCodeRef.current.resume()
                 }
               }}
